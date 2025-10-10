@@ -9,6 +9,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h" 
+#include "Core/HooksInterfaces/OnPlayerRestartedHook.h"
 #include "TopDownPlayerController.generated.h"
 
 class UInputMappingContext;
@@ -18,7 +19,7 @@ class UInputAction;
  * 
  */
 UCLASS()
-class LYOKOPLAYER_API ATopDownPlayerController : public ALyokoPlayerControllerBase
+class LYOKOPLAYER_API ATopDownPlayerController : public ALyokoPlayerControllerBase, public IOnPlayerRestartedHook
 {
 	GENERATED_BODY()
 
@@ -43,6 +44,7 @@ protected:
 
 	void Move(const FInputActionValue &Value);
 	void LookAtCursor();
+	void SetControlRotationToCamera(const APawn &NewPawn);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PauseGame();
@@ -50,6 +52,8 @@ protected:
 	virtual void OnPossess(APawn *InPawn) override;
 	virtual void OnUnPossess() override;
 
+	virtual void OnPlayerRestarted_Implementation() override;
+	
 	UFUNCTION()
 	virtual void OnPossessedPawnDead();
 

@@ -79,20 +79,9 @@ void ATopDownPlayerController::LookAtCursor()
 	ControlledPawn->SetActorRotation(newRotation);
 }
 
-void ATopDownPlayerController::OnPossess(APawn *InPawn)
+void ATopDownPlayerController::SetControlRotationToCamera(const APawn &NewPawn)
 {
-	Super::OnPossess(InPawn);
-	SetActorTickEnabled(true);
-	RespawnPoint = InPawn->GetActorTransform();
-	ACharacter* PossessedCharacter = Cast<ACharacter>(InPawn);
-
-	// Get the component ref from the interface or cast directly and move to PlayerControllerBase
-	if (UHealthComponent *HealthComponent = InPawn->FindComponentByClass<UHealthComponent>())
-	{
-		HealthComponent->OnDeadEvent.AddDynamic(this, &ATopDownPlayerController::OnPossessedPawnDead);
-	}
-
-	if (UCameraComponent *CameraComponent = InPawn->FindComponentByClass<UCameraComponent>())
+	if (UCameraComponent *CameraComponent = NewPawn.FindComponentByClass<UCameraComponent>())
 	{
 		FRotator CameraRotation = CameraComponent->GetComponentRotation();
 		CameraRotation.Pitch = 0.0f;
@@ -101,11 +90,40 @@ void ATopDownPlayerController::OnPossess(APawn *InPawn)
 	}
 }
 
+void ATopDownPlayerController::OnPossess(APawn *InPawn)
+{
+	Super::OnPossess(InPawn);
+	if (InPawn == nullptr) return;
+
+	SetActorTickEnabled(true);
+	RespawnPoint = InPawn->GetActorTransform();
+	SetControlRotationToCamera(*InPawn);
+
+	// Get the component ref from the interface or cast directly and move to PlayerControllerBase
+	if (UHealthComponent *HealthComponent = InPawn->FindComponentByClass<UHealthComponent>())
+	{
+		HealthComponent->OnDeadEvent.AddDynamic(this, &ATopDownPlayerController::OnPossessedPawnDead);
+	}
+}
+
 void ATopDownPlayerController::OnUnPossess()
 {
 	Super::OnUnPossess();
 
 	SetActorTickEnabled(false);
+}
+
+/** OnPlayerRestarted by LyokoGameModeBase at the end of the RestartPlayer method. 
+* For the TopDownPlayerController, the control rotation needs to be set to the camera direction
+* on new pawn possessed. However, part of the RestartPlayer logic overrides the control rotation after
+* OnPossess has been called.
+*/
+void ATopDownPlayerController::OnPlayerRestarted_Implementation()
+{
+	const APawn* PossessedPawn = GetPawn();
+	if (PossessedPawn == nullptr) return;
+
+	SetControlRotationToCamera(*PossessedPawn);
 }
 
 void ATopDownPlayerController::OnPossessedPawnDead()
@@ -119,22 +137,5 @@ void ATopDownPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	cooldown += DeltaSeconds;
-
-	// TODO@g - figure out why ControlRotation gets reset after OnPossess and remove this
-	if (cooldown < 1.0f)
-	{
-		APawn *ControlledPawn = GetPawn();
-		if (ControlledPawn)
-		{
-			if (UCameraComponent *CameraComponent = ControlledPawn->FindComponentByClass<UCameraComponent>())
-			{
-				FRotator CameraRotation = CameraComponent->GetComponentRotation();
-				CameraRotation.Pitch = 0.0f;
-				CameraRotation.Roll = 0.0f;
-				SetControlRotation(CameraRotation);
-			}
-		}
-	}
 	LookAtCursor();
 }

@@ -18,4 +18,8 @@ class LYOKOBASE_API ALyokoGameModeBase : public AGameModeBase
 	
 public:
 	void Respawn(ALyokoPlayerControllerBase *Controller);
+
+protected:
+	virtual void FinishRestartPlayer(AController *NewPlayer, const FRotator &StartRotation) override;
+
 };
