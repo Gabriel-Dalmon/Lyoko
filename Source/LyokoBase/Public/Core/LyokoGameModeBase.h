@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "LyokoGameModeBase.generated.h"
 
+class ALyokoPlayerControllerBase;
+
 /**
  * 
  */
@@ -14,4 +16,6 @@ class LYOKOBASE_API ALyokoGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+public:
+	void Respawn(ALyokoPlayerControllerBase *Controller);
 };

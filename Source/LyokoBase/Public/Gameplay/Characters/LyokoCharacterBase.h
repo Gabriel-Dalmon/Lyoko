@@ -12,6 +12,10 @@ class LYOKOBASE_API ALyokoCharacterBase : public ACharacter
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+	TObjectPtr<class UHealthComponent > HealthComponent;
+
+public:
 	// Sets default values for this character's properties
 	ALyokoCharacterBase();
 

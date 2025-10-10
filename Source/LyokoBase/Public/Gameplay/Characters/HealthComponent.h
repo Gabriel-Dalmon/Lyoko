@@ -6,23 +6,38 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthUpdatedEvent, float, PreviousHealth, float, CurrentHealth);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeadEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResurectEvent);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class LYOKOBASE_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
+	float MaxHealth;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
+	float CurrentHealth;
+
+	UPROPERTY(BlueprintAssignable, Category = "Health")
+	FOnHealthUpdatedEvent OnHealthUpdatedEvent;
+
+	UPROPERTY(BlueprintAssignable, Category = "Health")
+	FOnDeadEvent OnDeadEvent;
+
+	UPROPERTY(BlueprintAssignable, Category = "Health")
+	FOnResurectEvent OnResurectEvent;
+
+public:
 	UHealthComponent();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+public:
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void TakeDamage(float DamageAmount);
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void Heal(float HealAmount);
 };

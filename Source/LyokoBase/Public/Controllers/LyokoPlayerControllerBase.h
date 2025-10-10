@@ -14,4 +14,7 @@ class LYOKOBASE_API ALyokoPlayerControllerBase : public APlayerController
 {
 	GENERATED_BODY()
 
+public:
+	//To move to PlayerState
+	FTransform RespawnPoint;
 };

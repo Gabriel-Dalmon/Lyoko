@@ -4,7 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Controllers/LyokoPlayerControllerBase.h"
+#include "EnhancedInputComponent.h"
+#include "Templates/SubclassOf.h"
+#include "GameFramework/PlayerController.h"
+#include "Components/StaticMeshComponent.h"
+#include "UObject/ConstructorHelpers.h" 
 #include "TopDownPlayerController.generated.h"
+
+class UInputMappingContext;
+class UInputAction;
 
 /**
  * 
@@ -13,5 +21,40 @@ UCLASS()
 class LYOKOPLAYER_API ATopDownPlayerController : public ALyokoPlayerControllerBase
 {
 	GENERATED_BODY()
-	
+
+
+public:
+	/** MappingContext */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputMappingContext *MovementMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction *MovementInputAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction *PauseInputAction;
+
+	float cooldown = 0.0f;
+protected:
+	virtual void SetupInputComponent() override;
+
+	// To add mapping context
+	virtual void BeginPlay();
+
+	void Move(const FInputActionValue &Value);
+	void LookAtCursor();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PauseGame();
+
+	virtual void OnPossess(APawn *InPawn) override;
+	virtual void OnUnPossess() override;
+
+	UFUNCTION()
+	virtual void OnPossessedPawnDead();
+
+	virtual void Tick(float DeltaTime) override;
 };
+
+
+
