@@ -45,7 +45,10 @@
 		{
 			"Name": "LyokoWeapons",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"LyokoBase"
+			]
 		},
 		{
 			"Name": "LyokoEditor",

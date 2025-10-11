@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
 
 
 #include "Controllers/LyokoPlayerControllerBase.h"
