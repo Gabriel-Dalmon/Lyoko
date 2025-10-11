@@ -31,22 +31,37 @@ void ATopDownPlayerController::SetupInputComponent()
 	// set up gameplay key bindings
 	Super::SetupInputComponent();
 
-	// Add Input Mapping Context
-	if (UEnhancedInputLocalPlayerSubsystem *Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	{
-		Subsystem->AddMappingContext(MovementMappingContext, 0);
-	}
+	BindInputMapping(MovementInputMapping);
 
 	// Set up actions bindings
-	if (UEnhancedInputComponent *EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
-	{
-		EnhancedInputComponent->BindAction(MovementInputAction, ETriggerEvent::Triggered, this, &ATopDownPlayerController::OnMove);
-		EnhancedInputComponent->BindAction(PauseInputAction, ETriggerEvent::Triggered, this, &ATopDownPlayerController::PauseGame);
-	}
-	else
+	UEnhancedInputComponent *EnhancedInputComponent =
+		Cast<UEnhancedInputComponent>(InputComponent);
+	if (EnhancedInputComponent == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		return;
 	}
+
+#pragma region ActionsBinding
+	if (MovementInputAction.IsNull() == false)
+	{
+		EnhancedInputComponent->BindAction(
+			MovementInputAction.LoadSynchronous(),
+			ETriggerEvent::Triggered,
+			this,
+			&ATopDownPlayerController::OnMove
+		);
+	}
+	if (PauseInputAction.IsNull() == false)
+	{
+		EnhancedInputComponent->BindAction(
+			PauseInputAction.LoadSynchronous(),
+			ETriggerEvent::Triggered,
+			this,
+			&ATopDownPlayerController::PauseGame
+		);
+	}
+#pragma endregion ActionsBinding	
 }
 
 void ATopDownPlayerController::OnMove_Implementation(const FInputActionValue &Value)
