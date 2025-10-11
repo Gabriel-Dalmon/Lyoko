@@ -15,6 +15,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Core/LyokoGameModeBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Gameplay/Characters/MovementCharacter.h"
+
 
 
 
@@ -38,7 +40,7 @@ void ATopDownPlayerController::SetupInputComponent()
 	// Set up actions bindings
 	if (UEnhancedInputComponent *EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		EnhancedInputComponent->BindAction(MovementInputAction, ETriggerEvent::Triggered, this, &ATopDownPlayerController::Move);
+		EnhancedInputComponent->BindAction(MovementInputAction, ETriggerEvent::Triggered, this, &ATopDownPlayerController::OnMove);
 		EnhancedInputComponent->BindAction(PauseInputAction, ETriggerEvent::Triggered, this, &ATopDownPlayerController::PauseGame);
 	}
 	else
@@ -47,19 +49,18 @@ void ATopDownPlayerController::SetupInputComponent()
 	}
 }
 
-void ATopDownPlayerController::Move(const FInputActionValue &Value)
+void ATopDownPlayerController::OnMove_Implementation(const FInputActionValue &Value)
 {
-	APawn *ControlledPawn = GetPawn();
-	if (ControlledPawn == nullptr) return;
+	APawn *PossessedPawn = GetPawn();
+	const bool bIsMovementCharacter = PossessedPawn->GetClass()->ImplementsInterface(UMovementCharacter::StaticClass());
+	if (PossessedPawn == nullptr || bIsMovementCharacter == false) return;
 
-	const FVector2d Axes = Value.Get<FVector2D>();
+	const FVector2D Input = Value.Get<FVector2D>();
+	const float Yaw = GetControlRotation().Yaw;
 
-	const FRotator YawRotation(0, GetControlRotation().Yaw, 0);
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	const FVector2D RotatedInput = Input.GetRotated(Yaw);
 
-	ControlledPawn->AddMovementInput(ForwardDirection, Axes.Y);
-	ControlledPawn->AddMovementInput(RightDirection, Axes.X);
+	IMovementCharacter::Execute_Move(PossessedPawn, RotatedInput);
 }
 
 void ATopDownPlayerController::LookAtCursor()
@@ -68,15 +69,15 @@ void ATopDownPlayerController::LookAtCursor()
 	const bool bHit = GetHitResultUnderCursor(ECC_GameTraceChannel1, true, OutHit);
 	if (bHit == false) return;
 
-	APawn *ControlledPawn = GetPawn();
-	if (ControlledPawn == nullptr) return;
+	APawn *PossessedPawn = GetPawn();
+	if (PossessedPawn == nullptr) return;
 	
-	FRotator currentCharacterRotation = ControlledPawn->GetActorRotation();
+	FRotator CurrentCharacterRotation = PossessedPawn->GetActorRotation();
 
-	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(ControlledPawn->GetActorLocation(), OutHit.Location);
+	FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), OutHit.Location);
 
-	FRotator newRotation = FRotator(currentCharacterRotation.Pitch, PlayerRot.Yaw, PlayerRot.Roll);
-	ControlledPawn->SetActorRotation(newRotation);
+	FRotator NewRotation = FRotator(CurrentCharacterRotation.Pitch, PlayerRot.Yaw, PlayerRot.Roll);
+	PossessedPawn->SetActorRotation(NewRotation);
 }
 
 void ATopDownPlayerController::SetControlRotationToCamera(const APawn &NewPawn)

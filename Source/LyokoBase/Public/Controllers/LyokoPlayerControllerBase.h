@@ -17,4 +17,7 @@ class LYOKOBASE_API ALyokoPlayerControllerBase : public APlayerController
 public:
 	//To move to PlayerState
 	FTransform RespawnPoint;
+
+protected:
+	void BindInputMapping(TSoftObjectPtr<class UInputMappingContext> InputMapping);
 };

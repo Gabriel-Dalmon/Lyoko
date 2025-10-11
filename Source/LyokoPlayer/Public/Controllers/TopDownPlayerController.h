@@ -12,9 +12,6 @@
 #include "Core/HooksInterfaces/OnPlayerRestartedHook.h"
 #include "TopDownPlayerController.generated.h"
 
-class UInputMappingContext;
-class UInputAction;
-
 /**
  * 
  */
@@ -25,24 +22,28 @@ class LYOKOPLAYER_API ATopDownPlayerController : public ALyokoPlayerControllerBa
 
 
 public:
-	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputMappingContext *MovementMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction *MovementInputAction;
+	/** Movement mapping context */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Movement")
+	TSoftObjectPtr<class UInputMappingContext> MovementInputMapping;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction *PauseInputAction;
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Movement|Actions")
+	TSoftObjectPtr<class UInputAction> MovementInputAction;
 
-	float cooldown = 0.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Pause")
+	TSoftObjectPtr<class UInputAction> PauseInputAction;
+
 protected:
+
 	virtual void SetupInputComponent() override;
 
 	// To add mapping context
 	virtual void BeginPlay();
 
-	void Move(const FInputActionValue &Value);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Top Down Controller Callbacks")
+	void OnMove(const FInputActionValue &Value);
+	virtual void OnMove_Implementation(const FInputActionValue &Value);
+
 	void LookAtCursor();
 	void SetControlRotationToCamera(const APawn &NewPawn);
 
