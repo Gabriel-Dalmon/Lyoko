@@ -47,7 +47,9 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"LyokoBase"
+				"LyokoBase",
+				"MassEntity",
+				"Engine"
 			]
 		},
 		{

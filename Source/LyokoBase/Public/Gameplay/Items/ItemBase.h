@@ -11,16 +11,22 @@ class LYOKOBASE_API AItemBase : public AActor
 {
 	GENERATED_BODY()
 	
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Mesh")
+	UStaticMesh *Mesh;
+
+	/* Mesh Component */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	UStaticMeshComponent *MeshComponent;
+
 public:	
-	// Sets default values for this actor's properties
 	AItemBase();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	virtual void OnConstruction(const FTransform &Transform) override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent) override;
+#endif
 
 };

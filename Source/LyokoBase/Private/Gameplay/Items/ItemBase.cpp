@@ -3,25 +3,50 @@
 
 #include "Gameplay/Items/ItemBase.h"
 
-// Sets default values
 AItemBase::AItemBase()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	MeshComponent->SetupAttachment(RootComponent);
 }
 
-// Called when the game starts or when spawned
-void AItemBase::BeginPlay()
+void AItemBase::OnConstruction(const FTransform &Transform)
 {
-	Super::BeginPlay();
-	
+	Super::OnConstruction(Transform);
+
+	// Apply the mesh in both editor and runtime
+	if (Mesh)
+	{
+		MeshComponent->SetStaticMesh(Mesh);
+	}
+	else
+	{
+		MeshComponent->SetStaticMesh(nullptr);
+	}
 }
 
-// Called every frame
-void AItemBase::Tick(float DeltaTime)
+#if WITH_EDITOR
+/**
+ * Called when a property is changed in the editor
+ * @param PropertyChangedEvent - Event that was triggered
+*/
+void AItemBase::PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent)
 {
-	Super::Tick(DeltaTime);
+	Super::PostEditChangeProperty(PropertyChangedEvent);
 
+	FName PropertyName = PropertyChangedEvent.Property ? PropertyChangedEvent.Property->GetFName() : NAME_None;
+
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(AItemBase, Mesh))
+	{
+		if (Mesh)
+		{
+			MeshComponent->SetStaticMesh(Mesh);
+		}
+		else
+		{
+			MeshComponent->SetStaticMesh(nullptr);
+		}
+	}
 }
-
+#endif

@@ -10,6 +10,7 @@ public class LyokoWeapons : ModuleRules
             "Engine",
             "InputCore",
             "EnhancedInput",
+            "GeometryCollectionEngine",
             "LyokoBase"
         });
     }
