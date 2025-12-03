@@ -19,7 +19,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent *MeshComponent;
 
-public:	
+public:
 	AItemBase();
 
 protected:

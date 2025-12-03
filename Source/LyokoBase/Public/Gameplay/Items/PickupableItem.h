@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "UObject/ScriptInterface.h"
 #include "PickupableItem.generated.h"
+
+class IPickuper;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
@@ -20,6 +23,7 @@ class LYOKOBASE_API IPickupableItem
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickuper")
+	void OnPickup(const TScriptInterface<IPickuper>& Pickuper);
 };

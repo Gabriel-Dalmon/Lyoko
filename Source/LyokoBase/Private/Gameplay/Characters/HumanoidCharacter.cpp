@@ -24,3 +24,21 @@ void AHumanoidCharacter::Move_Implementation(const FVector2D &Direction)
 
 	AddMovementInput(MovementInput);
 }
+
+void AHumanoidCharacter::Pickup_Implementation(const TScriptInterface<IPickupableItem>& Pickupable)
+{
+	if (Pickupable) {
+		/*Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, AttachSocketName);
+		Weapon->AddActorLocalOffset(-Weapon->GetHandleTransform(ERelativeTransformSpace::RTS_Actor).GetLocation());*/
+	}
+}
+
+void AHumanoidCharacter::OnPickupableInReach_Implementation(const TScriptInterface<IPickupableItem>& Pickupable)
+{
+	// Notify controller
+}
+
+void AHumanoidCharacter::OnPickupableOutOfReach_Implementation(const TScriptInterface<IPickupableItem>& Pickupable)
+{
+	// Notify controller
+}
