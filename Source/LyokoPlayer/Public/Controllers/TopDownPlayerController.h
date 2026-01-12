@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Input|Movement|Actions")
 	TSoftObjectPtr<class UInputAction> MovementInputAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Movement|Actions")
+	TSoftObjectPtr<class UInputAction> PrimaryInteractInputAction;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Input|Pause")
 	TSoftObjectPtr<class UInputAction> PauseInputAction;
 
@@ -43,6 +46,11 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Top Down Controller Callbacks")
 	void OnMove(const FInputActionValue &Value);
 	virtual void OnMove_Implementation(const FInputActionValue &Value);
+
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Top Down Controller Callbacks")
+	void OnPrimaryInteract(const FInputActionValue& Value);
+	virtual void OnPrimaryInteract_Implementation(const FInputActionValue& Value);
 
 	void LookAtCursor();
 	void SetControlRotationToCamera(const APawn &NewPawn);

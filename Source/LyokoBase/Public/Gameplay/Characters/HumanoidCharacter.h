@@ -19,6 +19,18 @@ UCLASS()
 class LYOKOBASE_API AHumanoidCharacter : public ALyokoCharacterBase, public IMovementCharacter, public IPickuper
 {
 	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, Category = "Sockets")
+	bool bEnableSocketNamesOverride;
+
+	/* Name of the Left Grab Socket */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sockets", meta = (EditCondition = "bEnableSocketNamesOverride"))
+	FName LeftGrabSocketNameOverride;
+
+	/* Name of the Right Grab Socket */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sockets", meta = (EditCondition = "bEnableSocketNamesOverride"))
+	FName RightGrabSocketNameOverride;
 	
 protected:
 	TObjectPtr<AItemBase> MainItem;
@@ -31,4 +43,7 @@ public:
 	virtual void OnPickupableInReach_Implementation(const TScriptInterface<IPickupableItem>& Pickupable);
 
 	virtual void OnPickupableOutOfReach_Implementation(const TScriptInterface<IPickupableItem>& Pickupable);
+
+	UFUNCTION(BlueprintCallable)
+	FTransform GetGrabTransform(ERelativeTransformSpace TransformSpace) const;
 };

@@ -42,3 +42,19 @@ void AHumanoidCharacter::OnPickupableOutOfReach_Implementation(const TScriptInte
 {
 	// Notify controller
 }
+
+/**
+* @param TransformSpace - Space in which the transform should be returned
+* @return Grab transform subobject
+*/
+FTransform AHumanoidCharacter::GetGrabTransform(ERelativeTransformSpace TransformSpace) const
+{
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	FName HandleSocketName = LeftGrabSocketNameOverride;
+	if ((MeshComponent && MeshComponent->DoesSocketExist(HandleSocketName)) == false)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: Socket '%s' not found on mesh!"), *AHumanoidCharacter::StaticClass()->GetName(), *HandleSocketName.ToString());
+		return FTransform();
+	}
+	return MeshComponent->GetSocketTransform(HandleSocketName, TransformSpace);
+}

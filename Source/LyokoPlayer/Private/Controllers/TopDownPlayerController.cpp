@@ -51,6 +51,15 @@ void ATopDownPlayerController::SetupInputComponent()
 			&ATopDownPlayerController::OnMove
 		);
 	}
+	if (PrimaryInteractInputAction.IsNull() == false)
+	{
+		EnhancedInputComponent->BindAction(
+			PrimaryInteractInputAction.LoadSynchronous(),
+			ETriggerEvent::Triggered,
+			this,
+			&ATopDownPlayerController::OnPrimaryInteract
+		);
+	}
 	if (PauseInputAction.IsNull() == false)
 	{
 		EnhancedInputComponent->BindAction(
@@ -75,6 +84,16 @@ void ATopDownPlayerController::OnMove_Implementation(const FInputActionValue &Va
 	const FVector2D RotatedInput = Input.GetRotated(Yaw);
 
 	IMovementCharacter::Execute_Move(PossessedPawn, RotatedInput);
+}
+
+void ATopDownPlayerController::OnPrimaryInteract_Implementation(const FInputActionValue& Value)
+{
+	APawn* PossessedPawn = GetPawn();
+
+	/*if (PossessedPawn && PossessedPawn->Implements<UPickuper>())
+	{
+		UPickuper::Execute_PrimaryInteract()
+	}*/
 }
 
 void ATopDownPlayerController::LookAtCursor()
