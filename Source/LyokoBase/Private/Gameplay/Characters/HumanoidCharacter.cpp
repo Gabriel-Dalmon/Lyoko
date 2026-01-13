@@ -1,6 +1,8 @@
 // Copyright © 2025 Lyoko - 96 l'Art Cheperdu
 
 #include "Gameplay/Characters/HumanoidCharacter.h"
+#include "Gameplay/Interactable.h"
+#include "Gameplay/Items/PickupableItem.h"
 
 void AHumanoidCharacter::Move_Implementation(const FVector2D &Direction)
 {
@@ -27,10 +29,22 @@ void AHumanoidCharacter::Move_Implementation(const FVector2D &Direction)
 
 void AHumanoidCharacter::Pickup_Implementation(const TScriptInterface<IPickupableItem>& Pickupable)
 {
-	if (Pickupable) {
-		/*Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, AttachSocketName);
-		Weapon->AddActorLocalOffset(-Weapon->GetHandleTransform(ERelativeTransformSpace::RTS_Actor).GetLocation());*/
+	if (!Pickupable)
+	{
+		return;
 	}
+	if (MainItem) {
+		//drop
+	}
+	MainItem = Cast<AItemBase>(Pickupable.GetObject());
+	if (!MainItem) 
+	{
+		return;
+	}
+
+	//Pickup
+	MainItem->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, LeftGrabSocketName);
+	IPickupableItem::Execute_OnPickedUp(MainItem, this); // -> Pickupable->AddActorLocalOffset(-Weapon->GetHandleTransform(ERelativeTransformSpace::RTS_Actor).GetLocation()); //Todo
 }
 
 void AHumanoidCharacter::OnPickupableInReach_Implementation(const TScriptInterface<IPickupableItem>& Pickupable)
@@ -43,6 +57,36 @@ void AHumanoidCharacter::OnPickupableOutOfReach_Implementation(const TScriptInte
 	// Notify controller
 }
 
+void AHumanoidCharacter::Interact_Implementation(EInteractionTypes Type)
+{
+	switch (Type) {
+	case EInteractionTypes::Primary:
+		PrimaryInteract();
+		break;
+	case EInteractionTypes::Secondary:
+		SecondaryInteract();
+	case EInteractionTypes::Ternary:
+		TernaryInteract();
+	}
+}
+
+void AHumanoidCharacter::PrimaryInteract_Implementation()
+{
+	if (MainItem && MainItem->Implements<UInteractable>()) {
+		IInteractable::Execute_OnInteracted(MainItem, EInteractionTypes::Primary);
+	}
+}
+
+void AHumanoidCharacter::SecondaryInteract_Implementation()
+{
+	//Try to interact with environment (list of IInteractables)
+}
+
+void AHumanoidCharacter::TernaryInteract_Implementation()
+{
+	//Drop MainItem
+}
+
 /**
 * @param TransformSpace - Space in which the transform should be returned
 * @return Grab transform subobject
@@ -50,7 +94,7 @@ void AHumanoidCharacter::OnPickupableOutOfReach_Implementation(const TScriptInte
 FTransform AHumanoidCharacter::GetGrabTransform(ERelativeTransformSpace TransformSpace) const
 {
 	USkeletalMeshComponent* MeshComponent = GetMesh();
-	FName HandleSocketName = LeftGrabSocketNameOverride;
+	FName HandleSocketName = LeftGrabSocketName;
 	if ((MeshComponent && MeshComponent->DoesSocketExist(HandleSocketName)) == false)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s: Socket '%s' not found on mesh!"), *AHumanoidCharacter::StaticClass()->GetName(), *HandleSocketName.ToString());

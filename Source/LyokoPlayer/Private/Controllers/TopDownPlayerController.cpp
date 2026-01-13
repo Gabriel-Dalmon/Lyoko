@@ -13,6 +13,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Core/LyokoGameModeBase.h"
+#include "Gameplay/Interactor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Gameplay/Characters/MovementCharacter.h"
 
@@ -60,6 +61,24 @@ void ATopDownPlayerController::SetupInputComponent()
 			&ATopDownPlayerController::OnPrimaryInteract
 		);
 	}
+	if (PrimaryInteractInputAction.IsNull() == false)
+	{
+		EnhancedInputComponent->BindAction(
+			SecondaryInteractInputAction.LoadSynchronous(),
+			ETriggerEvent::Triggered,
+			this,
+			&ATopDownPlayerController::OnSecondaryInteract
+		);
+	}
+	if (PrimaryInteractInputAction.IsNull() == false)
+	{
+		EnhancedInputComponent->BindAction(
+			SecondaryInteractInputAction.LoadSynchronous(),
+			ETriggerEvent::Triggered,
+			this,
+			&ATopDownPlayerController::OnTernaryInteract
+		);
+	}
 	if (PauseInputAction.IsNull() == false)
 	{
 		EnhancedInputComponent->BindAction(
@@ -88,12 +107,27 @@ void ATopDownPlayerController::OnMove_Implementation(const FInputActionValue &Va
 
 void ATopDownPlayerController::OnPrimaryInteract_Implementation(const FInputActionValue& Value)
 {
+	ForwardInteractionToPawn(EInteractionTypes::Primary);
+}
+
+void ATopDownPlayerController::OnSecondaryInteract_Implementation(const FInputActionValue& Value)
+{
+	ForwardInteractionToPawn(EInteractionTypes::Secondary);
+}
+
+void ATopDownPlayerController::OnTernaryInteract_Implementation(const FInputActionValue& Value)
+{
+	ForwardInteractionToPawn(EInteractionTypes::Ternary);
+}
+
+void ATopDownPlayerController::ForwardInteractionToPawn(EInteractionTypes Type) const
+{
 	APawn* PossessedPawn = GetPawn();
 
-	/*if (PossessedPawn && PossessedPawn->Implements<UPickuper>())
+	if (PossessedPawn && PossessedPawn->Implements<UInteractor>())
 	{
-		UPickuper::Execute_PrimaryInteract()
-	}*/
+		IInteractor::Execute_Interact(PossessedPawn, Type);
+	}
 }
 
 void ATopDownPlayerController::LookAtCursor()

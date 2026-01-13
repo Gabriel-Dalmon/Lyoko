@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Gameplay/Characters/LyokoCharacterBase.h"
 #include "Gameplay/Characters/MovementCharacter.h"
+#include "Gameplay/Interactor.h"
 #include "Gameplay/Pickuper.h"
 #include "Gameplay/Items/ItemBase.h"
 #include "UObject/ScriptInterface.h"
@@ -16,7 +17,7 @@ class IPickupableItem;
  * 
  */
 UCLASS()
-class LYOKOBASE_API AHumanoidCharacter : public ALyokoCharacterBase, public IMovementCharacter, public IPickuper
+class LYOKOBASE_API AHumanoidCharacter : public ALyokoCharacterBase, public IMovementCharacter, public IPickuper, public IInteractor
 {
 	GENERATED_BODY()
 
@@ -26,11 +27,11 @@ public:
 
 	/* Name of the Left Grab Socket */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sockets", meta = (EditCondition = "bEnableSocketNamesOverride"))
-	FName LeftGrabSocketNameOverride;
+	FName LeftGrabSocketName;
 
 	/* Name of the Right Grab Socket */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sockets", meta = (EditCondition = "bEnableSocketNamesOverride"))
-	FName RightGrabSocketNameOverride;
+	FName RightGrabSocketName;
 	
 protected:
 	TObjectPtr<AItemBase> MainItem;
@@ -43,6 +44,20 @@ public:
 	virtual void OnPickupableInReach_Implementation(const TScriptInterface<IPickupableItem>& Pickupable);
 
 	virtual void OnPickupableOutOfReach_Implementation(const TScriptInterface<IPickupableItem>& Pickupable);
+
+	virtual void Interact_Implementation(EInteractionTypes Type);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void PrimaryInteract();
+	virtual void PrimaryInteract_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SecondaryInteract();
+	virtual void SecondaryInteract_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void TernaryInteract();
+	virtual void TernaryInteract_Implementation();
 
 	UFUNCTION(BlueprintCallable)
 	FTransform GetGrabTransform(ERelativeTransformSpace TransformSpace) const;

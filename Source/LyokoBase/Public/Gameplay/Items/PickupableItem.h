@@ -25,5 +25,5 @@ class LYOKOBASE_API IPickupableItem
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickuper")
-	void OnPickup(const TScriptInterface<IPickuper>& Pickuper);
+	void OnPickedUp(const TScriptInterface<IPickuper>& Pickuper);
 };

@@ -9,6 +9,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h" 
+#include "Gameplay/InteractionTypes.h"
 #include "Core/HooksInterfaces/OnPlayerRestartedHook.h"
 #include "TopDownPlayerController.generated.h"
 
@@ -30,8 +31,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Input|Movement|Actions")
 	TSoftObjectPtr<class UInputAction> MovementInputAction;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input|Movement|Actions")
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Interactions")
 	TSoftObjectPtr<class UInputAction> PrimaryInteractInputAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Interactions")
+	TSoftObjectPtr<class UInputAction> SecondaryInteractInputAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Interactions")
+	TSoftObjectPtr<class UInputAction> TernaryInteractInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input|Pause")
 	TSoftObjectPtr<class UInputAction> PauseInputAction;
@@ -52,6 +59,18 @@ protected:
 	void OnPrimaryInteract(const FInputActionValue& Value);
 	virtual void OnPrimaryInteract_Implementation(const FInputActionValue& Value);
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Top Down Controller Callbacks")
+	void OnSecondaryInteract(const FInputActionValue& Value);
+	virtual void OnSecondaryInteract_Implementation(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Top Down Controller Callbacks")
+	void OnTernaryInteract(const FInputActionValue& Value);
+	virtual void OnTernaryInteract_Implementation(const FInputActionValue& Value);
+
+protected:
+	void ForwardInteractionToPawn(EInteractionTypes Type) const;
+
+public:
 	void LookAtCursor();
 	void SetControlRotationToCamera(const APawn &NewPawn);
 
