@@ -6,7 +6,7 @@
 #include "GameFramework/Character.h"
 #include "LyokoCharacterBase.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class LYOKOBASE_API ALyokoCharacterBase : public ACharacter
 {
 	GENERATED_BODY()
@@ -29,5 +29,4 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };

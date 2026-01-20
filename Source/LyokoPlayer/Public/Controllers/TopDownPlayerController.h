@@ -16,7 +16,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class LYOKOPLAYER_API ATopDownPlayerController : public ALyokoPlayerControllerBase, public IOnPlayerRestartedHook
 {
 	GENERATED_BODY()
