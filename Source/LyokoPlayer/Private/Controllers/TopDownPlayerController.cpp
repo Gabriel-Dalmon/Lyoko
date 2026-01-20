@@ -32,6 +32,7 @@ void ATopDownPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	BindInputMapping(MovementInputMapping);
+	BindInputMapping(InteractionsInputMapping);
 
 	// Set up actions bindings
 	UEnhancedInputComponent *EnhancedInputComponent =

@@ -19,5 +19,9 @@ public:
 	FTransform RespawnPoint;
 
 protected:
-	void BindInputMapping(TSoftObjectPtr<class UInputMappingContext> InputMapping);
+	UFUNCTION(BlueprintCallable, Category = "Lyoko Player Controller Base")
+	virtual void BindInputMapping(const TSoftObjectPtr<class UInputMappingContext>& InputMapping);
+
+	UFUNCTION(BlueprintCallable, Category = "Lyoko Player Controller Base")
+	virtual void UnbindInputMapping(const TSoftObjectPtr<class UInputMappingContext>& InputMapping);
 };

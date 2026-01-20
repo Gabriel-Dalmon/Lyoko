@@ -31,13 +31,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Input|Movement|Actions")
 	TSoftObjectPtr<class UInputAction> MovementInputAction;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input|Interactions")
+	/** Interactions mapping context */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Interactions")
+	TSoftObjectPtr<class UInputMappingContext> InteractionsInputMapping;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Interactions|Actions")
 	TSoftObjectPtr<class UInputAction> PrimaryInteractInputAction;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input|Interactions")
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Interactions|Actions")
 	TSoftObjectPtr<class UInputAction> SecondaryInteractInputAction;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input|Interactions")
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Interactions|Actions")
 	TSoftObjectPtr<class UInputAction> TernaryInteractInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input|Pause")
@@ -53,7 +57,6 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Top Down Controller Callbacks")
 	void OnMove(const FInputActionValue &Value);
 	virtual void OnMove_Implementation(const FInputActionValue &Value);
-
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Top Down Controller Callbacks")
 	void OnPrimaryInteract(const FInputActionValue& Value);

@@ -7,6 +7,7 @@
 #include "Gameplay/Characters/MovementCharacter.h"
 #include "Gameplay/Interactor.h"
 #include "Gameplay/Pickuper.h"
+#include "Gameplay/Dropper.h"
 #include "Gameplay/Items/ItemBase.h"
 #include "UObject/ScriptInterface.h"
 #include "HumanoidCharacter.generated.h"
@@ -17,7 +18,7 @@ class IPickupableItem;
  * 
  */
 UCLASS()
-class LYOKOBASE_API AHumanoidCharacter : public ALyokoCharacterBase, public IMovementCharacter, public IPickuper, public IInteractor
+class LYOKOBASE_API AHumanoidCharacter : public ALyokoCharacterBase, public IMovementCharacter, public IInteractor, public IPickuper, public IDropper
 {
 	GENERATED_BODY()
 
@@ -33,17 +34,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sockets", meta = (EditCondition = "bEnableSocketNamesOverride"))
 	FName RightGrabSocketName;
 	
-protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
 	TObjectPtr<AItemBase> MainItem;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
+	TArray<TScriptInterface<IPickupable>> Pickupables;
 
 public:
 	virtual void Move_Implementation(const FVector2D &Direction) override;
 
-	virtual void Pickup_Implementation(const TScriptInterface<IPickupableItem>& Pickupable);
-	
-	virtual void OnPickupableInReach_Implementation(const TScriptInterface<IPickupableItem>& Pickupable);
+	virtual void Pickup_Implementation(const TScriptInterface<IPickupable>& Pickupable);
 
-	virtual void OnPickupableOutOfReach_Implementation(const TScriptInterface<IPickupableItem>& Pickupable);
+	virtual void Drop_Implementation(const TScriptInterface<IDroppable>& Droppable);
+	
+	virtual void OnPickupableInReach_Implementation(const TScriptInterface<IPickupable>& Pickupable);
+
+	virtual void OnPickupableOutOfReach_Implementation(const TScriptInterface<IPickupable>& Pickupable);
 
 	virtual void Interact_Implementation(EInteractionTypes Type);
 
@@ -58,6 +64,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void TernaryInteract();
 	virtual void TernaryInteract_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void DropMainItem();
+	virtual void DropMainItem_Implementation();
 
 	UFUNCTION(BlueprintCallable)
 	FTransform GetGrabTransform(ERelativeTransformSpace TransformSpace) const;

@@ -2,8 +2,12 @@
 
 #include "Gameplay/Characters/HumanoidCharacter.h"
 #include "Gameplay/Interactable.h"
-#include "Gameplay/Items/PickupableItem.h"
+#include "Gameplay/Pickupable.h"
+#include "Gameplay/Droppable.h"
 
+/**
+* @param Direction - Direction to move in
+*/
 void AHumanoidCharacter::Move_Implementation(const FVector2D &Direction)
 {
 	//--------------------------------------------------------------------------
@@ -27,36 +31,70 @@ void AHumanoidCharacter::Move_Implementation(const FVector2D &Direction)
 	AddMovementInput(MovementInput);
 }
 
-void AHumanoidCharacter::Pickup_Implementation(const TScriptInterface<IPickupableItem>& Pickupable)
+/**
+* @param Pickupable - The Pickupable to pick up
+*/
+void AHumanoidCharacter::Pickup_Implementation(const TScriptInterface<IPickupable>& Pickupable)
 {
 	if (!Pickupable)
 	{
 		return;
 	}
 	if (MainItem) {
-		//drop
+		if (MainItem->Implements<UDroppable>()) { //TODO@g: Probably constrain MainItem to always be IDroppable, IPickupable
+			IDropper::Execute_Drop(this, MainItem);
+		}
+		MainItem = nullptr;
 	}
 	MainItem = Cast<AItemBase>(Pickupable.GetObject());
 	if (!MainItem) 
 	{
 		return;
 	}
-
-	//Pickup
 	MainItem->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, LeftGrabSocketName);
-	IPickupableItem::Execute_OnPickedUp(MainItem, this); // -> Pickupable->AddActorLocalOffset(-Weapon->GetHandleTransform(ERelativeTransformSpace::RTS_Actor).GetLocation()); //Todo
+	IPickupable::Execute_OnPickedUp(MainItem, this);
 }
 
-void AHumanoidCharacter::OnPickupableInReach_Implementation(const TScriptInterface<IPickupableItem>& Pickupable)
+/**
+* @param Droppable - The Droppable to drop
+*/
+void AHumanoidCharacter::Drop_Implementation(const TScriptInterface<IDroppable>& Droppable)
 {
-	// Notify controller
+	if (!Droppable)
+	{
+		return;
+	}
+	
+	IDroppable::Execute_OnDropped(Droppable.GetObject(), this);
 }
 
-void AHumanoidCharacter::OnPickupableOutOfReach_Implementation(const TScriptInterface<IPickupableItem>& Pickupable)
+/**
+* @param Pickupable - The Pickupable that came into reach
+*/
+void AHumanoidCharacter::OnPickupableInReach_Implementation(const TScriptInterface<IPickupable>& Pickupable)
 {
-	// Notify controller
+	if (!Pickupable)
+	{
+		return;
+	}
+	Pickupables.Add(Pickupable);
 }
 
+/**
+* @param Pickupable - The Pickupable that went out of reach
+*/
+void AHumanoidCharacter::OnPickupableOutOfReach_Implementation(const TScriptInterface<IPickupable>& Pickupable)
+{
+	if (!Pickupable)
+	{
+		return;
+	}
+	Pickupables.RemoveSwap(Pickupable);
+}
+
+/**
+* @param Type - Type of interaction
+*/
 void AHumanoidCharacter::Interact_Implementation(EInteractionTypes Type)
 {
 	switch (Type) {
@@ -70,6 +108,8 @@ void AHumanoidCharacter::Interact_Implementation(EInteractionTypes Type)
 	}
 }
 
+/**
+*/
 void AHumanoidCharacter::PrimaryInteract_Implementation()
 {
 	if (MainItem && MainItem->Implements<UInteractable>()) {
@@ -77,14 +117,50 @@ void AHumanoidCharacter::PrimaryInteract_Implementation()
 	}
 }
 
+/**
+*/
 void AHumanoidCharacter::SecondaryInteract_Implementation()
 {
-	//Try to interact with environment (list of IInteractables)
+	// Pickup Pickupable in reach if no empty handed
+	if (!MainItem && !Pickupables.IsEmpty())
+	{
+		auto Pickupable = Pickupables.Last();
+		IPickuper::Execute_Pickup(this, Pickupable);
+		Pickupables.RemoveSwap(Pickupable);
+
+	}
+	else
+	{
+		//Try to interact with environment (list of IInteractables)
+	}
 }
 
+/**
+*/
 void AHumanoidCharacter::TernaryInteract_Implementation()
 {
-	//Drop MainItem
+	//Drop MainItem or Swap with another Pickupable in reach
+	if (MainItem) {
+		if (!Pickupables.IsEmpty()) {
+			auto Pickupable = Pickupables.Last();
+			IPickuper::Execute_Pickup(this, Pickupable);
+			Pickupables.RemoveSwap(Pickupable);
+		}
+		else {
+			DropMainItem();
+		}
+	}
+}
+
+/**
+*/
+void AHumanoidCharacter::DropMainItem_Implementation()
+{
+	if (MainItem) {
+		checkf(MainItem->Implements<UDroppable>(), TEXT("Tried to drop %s's MainItem without the %s interface."), *GetName(), *UDroppable::StaticClass()->GetName());
+		IDropper::Execute_Drop(this, MainItem);
+	}
+	MainItem = nullptr;
 }
 
 /**
