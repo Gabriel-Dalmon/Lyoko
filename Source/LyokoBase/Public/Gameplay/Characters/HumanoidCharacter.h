@@ -9,7 +9,7 @@
 #include "Gameplay/Interactor.h"
 #include "Gameplay/Pickuper.h"
 #include "Gameplay/Dropper.h"
-#include "Gameplay/Items/ItemBase.h"
+#include "Gameplay/Items/Item.h"
 #include "UObject/ScriptInterface.h"
 #include "HumanoidCharacter.generated.h"
 
@@ -36,7 +36,7 @@ public:
 	FName RightHandGripSocketName = TEXT("HandGrip_R");
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
-	TObjectPtr<AItemBase> MainItem;
+	TObjectPtr<AItem> MainItem;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
 	TArray<TScriptInterface<IPickupable>> Pickupables;
@@ -46,9 +46,9 @@ public:
 
 	virtual void Drop_Implementation(const TScriptInterface<IDroppable>& Droppable);
 	
-	virtual void OnPickupableInReach_Implementation(const TScriptInterface<IPickupable>& Pickupable);
+	virtual void OnPickupableInReach_Implementation(const TScriptInterface<IPickupable>& Pickupable) override;
 
-	virtual void OnPickupableOutOfReach_Implementation(const TScriptInterface<IPickupable>& Pickupable);
+	virtual void OnPickupableOutOfReach_Implementation(const TScriptInterface<IPickupable>& Pickupable) override;
 
 	virtual void Interact_Implementation(EInteractionTypes Type);
 

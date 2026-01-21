@@ -12,21 +12,10 @@ class LYOKOBASE_API AItemBase : public AActor
 	GENERATED_BODY()
 	
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Mesh")
-	UStaticMesh *Mesh;
-
 	/* Mesh Component */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	UStaticMeshComponent *MeshComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> MeshComponent;
 
 public:
 	AItemBase();
-
-protected:
-	virtual void OnConstruction(const FTransform &Transform) override;
-
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent) override;
-#endif
-
 };

@@ -10,18 +10,29 @@
 */
 void AHumanoidCharacter::Pickup_Implementation(const TScriptInterface<IPickupable>& Pickupable)
 {
-	if (!Pickupable)
-	{
-		return;
-	}
-	if (MainItem) {
-		if (MainItem->Implements<UDroppable>()) { //TODO@g: Probably constrain MainItem to always be IDroppable, IPickupable
-			IDropper::Execute_Drop(this, MainItem);
+	const auto PickupableObject = Pickupable.GetObject();
+	checkf(PickupableObject, TEXT("Pickup called with an invalid Pickupable."));
+
+	// Steal Pickupable if already carried else cancel pickup
+	if (IPickupable::Execute_IsCarried(PickupableObject)) {
+		if (!IPickupable::Execute_CanBeStolen(PickupableObject, TScriptInterface<IPickuper>(this))) {
+			return;
+		} 
+		else
+		{
+			IPickupable::Execute_OnStolen(PickupableObject, TScriptInterface<IPickuper>(this));
 		}
+	}
+
+	// Drop MainItem if not empty handed
+	if (MainItem) {
+		IDropper::Execute_Drop(this, MainItem);
 		MainItem = nullptr;
 	}
-	MainItem = Cast<AItemBase>(Pickupable.GetObject());
-	if (!MainItem) 
+
+	// Update the Pickupable to become the new MainItem
+	MainItem = Cast<AItem>(PickupableObject);
+	if (!MainItem)
 	{
 		return;
 	}
@@ -34,12 +45,9 @@ void AHumanoidCharacter::Pickup_Implementation(const TScriptInterface<IPickupabl
 */
 void AHumanoidCharacter::Drop_Implementation(const TScriptInterface<IDroppable>& Droppable)
 {
-	if (!Droppable)
-	{
-		return;
-	}
-	
-	IDroppable::Execute_OnDropped(Droppable.GetObject(), this);
+	auto DroppableObject = Droppable.GetObject();
+	checkf(DroppableObject, TEXT("Drop called with an invalid Droppable."));
+	IDroppable::Execute_OnDropped(DroppableObject, this);
 }
 
 /**
@@ -47,10 +55,7 @@ void AHumanoidCharacter::Drop_Implementation(const TScriptInterface<IDroppable>&
 */
 void AHumanoidCharacter::OnPickupableInReach_Implementation(const TScriptInterface<IPickupable>& Pickupable)
 {
-	if (!Pickupable)
-	{
-		return;
-	}
+	checkf(Pickupable.GetObject(), TEXT("OnPickupableInReach called with an invalid Pickupable."));
 	Pickupables.Add(Pickupable);
 }
 
@@ -59,10 +64,7 @@ void AHumanoidCharacter::OnPickupableInReach_Implementation(const TScriptInterfa
 */
 void AHumanoidCharacter::OnPickupableOutOfReach_Implementation(const TScriptInterface<IPickupable>& Pickupable)
 {
-	if (!Pickupable)
-	{
-		return;
-	}
+	checkf(Pickupable.GetObject(), TEXT("OnPickupableOutOfReach called with an invalid Pickupable."));
 	Pickupables.RemoveSwap(Pickupable);
 }
 
@@ -101,7 +103,6 @@ void AHumanoidCharacter::SecondaryInteract_Implementation()
 		auto Pickupable = Pickupables.Last();
 		IPickuper::Execute_Pickup(this, Pickupable);
 		Pickupables.RemoveSwap(Pickupable);
-
 	}
 	else
 	{
