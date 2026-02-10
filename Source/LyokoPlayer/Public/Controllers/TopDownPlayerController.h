@@ -10,6 +10,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h" 
 #include "Gameplay/InteractionTypes.h"
+#include "Gameplay/Combat/CombatActor.h"
 #include "Core/HooksInterfaces/OnPlayerRestartedHook.h"
 #include "TopDownPlayerController.generated.h"
 
@@ -17,7 +18,7 @@
  * 
  */
 UCLASS(Abstract)
-class LYOKOPLAYER_API ATopDownPlayerController : public ALyokoPlayerControllerBase, public IOnPlayerRestartedHook
+class LYOKOPLAYER_API ATopDownPlayerController : public ALyokoPlayerControllerBase, public IOnPlayerRestartedHook, public ICombatActor
 {
 	GENERATED_BODY()
 
@@ -76,6 +77,18 @@ protected:
 public:
 	void LookAtCursor();
 	void SetControlRotationToCamera(const APawn &NewPawn);
+
+public:
+	inline virtual FVector GetAttackDirection_Implementation(FVector AttackOrigin) const
+	{
+		FVector RayStart, RayDirection;
+		DeprojectMousePositionToWorld(RayStart, RayDirection);
+		FVector RayHitLocation = FMath::LinePlaneIntersection(RayStart, RayStart + RayDirection * 10000.0f, FVector(0.0f, 0.0f, AttackOrigin.Z), FVector::UpVector);
+
+		FVector Direction = RayHitLocation - AttackOrigin;
+		Direction.Z = 0.0f;
+		return Direction.GetSafeNormal();
+	}
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PauseGame();

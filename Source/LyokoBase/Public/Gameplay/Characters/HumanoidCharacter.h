@@ -52,7 +52,11 @@ public:
 
 	virtual void Interact_Implementation(EInteractionTypes Type);
 
-	inline virtual FVector GetAttackDirection_Implementation() const {
+	inline virtual FVector GetAttackDirection_Implementation(FVector AttackOrigin) const {
+		if (Controller && Controller->Implements<UCombatActor>())
+		{
+			return ICombatActor::Execute_GetAttackDirection(Controller, AttackOrigin);
+		}
 		return GetActorRotation().Vector();
 	}
 
