@@ -4,13 +4,16 @@ public class LyokoAI : ModuleRules
 {
     public LyokoAI(ReadOnlyTargetRules Target) : base(Target)
     {
-        PrivateDependencyModuleNames.AddRange(new string[] { 
-            "Core", 
-            "CoreUObject", 
+        PrivateDependencyModuleNames.AddRange(new string[] {
+            "Core",
+            "CoreUObject",
             "Engine",
             "InputCore",
             "EnhancedInput",
-            "LyokoBase"
+            "AIModule",
+            "NavigationSystem",
+            "LyokoBase",
+            "LyokoWeapons"
         });
     }
 }
