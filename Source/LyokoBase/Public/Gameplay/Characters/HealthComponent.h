@@ -40,4 +40,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void Heal(float HealAmount);
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void AddMaxHealth(float HealthAmount);
 };

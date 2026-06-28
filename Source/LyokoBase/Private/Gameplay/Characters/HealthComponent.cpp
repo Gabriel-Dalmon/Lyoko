@@ -46,3 +46,9 @@ void UHealthComponent::Heal(float HealAmount)
         }
     }
 }
+
+void UHealthComponent::AddMaxHealth(float HealthAmount)
+{
+    MaxHealth += HealthAmount;
+    CurrentHealth += HealthAmount;
+}
