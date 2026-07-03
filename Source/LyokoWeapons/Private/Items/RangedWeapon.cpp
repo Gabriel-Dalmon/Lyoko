@@ -3,6 +3,7 @@
 
 #include "Items/RangedWeapon.h"
 
+
 /**
 * Fire a projectile using default weapon settings
 */
@@ -58,7 +59,8 @@ void ARangedWeapon::Fire(const FVector &OffsetFromMuzzle, const FVector & Direct
         SpawnParams
     );
 
-    checkf(Projectile, TEXT("%s: Failed to spawn projectile of class %s!"), *ARangedWeapon::StaticClass()->GetName(), *ProjectileClass->GetName());
+    UE_CLOG(!Projectile, LogTemp, Error, TEXT("%s: Failed to spawn projectile of class %s!"), *ARangedWeapon::StaticClass()->GetName(), *ProjectileClass->GetName());
+
     if (Projectile)
     {
         const FVector InitialVelocity = Direction * InitialSpeed;
@@ -68,7 +70,7 @@ void ARangedWeapon::Fire(const FVector &OffsetFromMuzzle, const FVector & Direct
 
 /**
 */
-void ARangedWeapon::FireInDirection(const FVector& Direction)
+void ARangedWeapon::FireInDirection_Implementation(const FVector& Direction)
 {
     const FVector OffsetFromMuzzle = FVector(0.f);
     Fire(OffsetFromMuzzle, Direction);
