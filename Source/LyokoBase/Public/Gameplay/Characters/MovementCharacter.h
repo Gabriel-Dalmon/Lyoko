@@ -10,7 +10,7 @@
 UINTERFACE(MinimalAPI)
 class UMovementCharacter : public UInterface
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 };
 
 /**
@@ -18,10 +18,16 @@ class UMovementCharacter : public UInterface
  */
 class LYOKOBASE_API IMovementCharacter
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Movement Character")
+    FVector GetMovementVelocity() const;
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Movement Character")
-	void Move(const FVector2D &Direction);
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Movement Character")
+    float GetMovementAngle() const;
+
+public:
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Movement Character")
+    void Move(const FVector2D &Direction);
 };
