@@ -70,7 +70,7 @@ void ARangedWeapon::Fire(const FVector &OffsetFromMuzzle, const FVector & Direct
 
 /**
 */
-void ARangedWeapon::FireInDirection(const FVector& Direction)
+void ARangedWeapon::FireInDirection_Implementation(const FVector& Direction)
 {
     const FVector OffsetFromMuzzle = FVector(0.f);
     Fire(OffsetFromMuzzle, Direction);
