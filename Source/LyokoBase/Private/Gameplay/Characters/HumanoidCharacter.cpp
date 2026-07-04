@@ -36,7 +36,7 @@ void AHumanoidCharacter::Pickup_Implementation(const TScriptInterface<IPickupabl
 	{
 		return;
 	}
-	MainItem->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, LeftHandGripSocketName);
+	MainItem->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RightHandGripSocketName);
 	IPickupable::Execute_OnPickedUp(MainItem, this);
 }
 
