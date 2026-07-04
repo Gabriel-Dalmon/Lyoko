@@ -6,6 +6,22 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
+ALyokoAIControllerBase::ALyokoAIControllerBase()
+{
+    PerceptionComponentBis = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
+    SetPerceptionComponent(*PerceptionComponentBis);
+
+    SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+
+    PerceptionComponentBis->ConfigureSense(*SightConfig);
+
+    HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
+
+    PerceptionComponentBis->ConfigureSense(*HearingConfig);
+
+    PerceptionComponentBis->SetDominantSense(SightConfig->GetSenseImplementation());
+}
+
 void ALyokoAIControllerBase::OnPossess(APawn *InPawn)
 {
     Super::OnPossess(InPawn);
@@ -50,6 +66,8 @@ void ALyokoAIControllerBase::OnPossess(APawn *InPawn)
     }
 }
 
+
+
 void ALyokoAIControllerBase::OnBehaviourStateChanged_Implementation(FName ChangedKeyName)
 {
     UE_LOG(LogTemp, Log, TEXT("[%s]: Behavior state changed to %s in %s."), *GetClass()->GetName(), *ChangedKeyName.ToString(), *GetName());
@@ -62,4 +80,18 @@ EBlackboardNotificationResult ALyokoAIControllerBase::InternalOnBehaviourStateCh
     OnBehaviourStateChanged(KeyName);
 
     return EBlackboardNotificationResult::ContinueObserving;
+}
+
+void ALyokoAIControllerBase::SetHearingRadius(float Radius)
+{
+    if (!PerceptionComponentBis || !HearingConfig)
+    {
+        return;
+    }
+
+    HearingConfig->HearingRange = Radius;
+    HearingConfig->LoSHearingRange = Radius + 500.f;
+
+    PerceptionComponentBis->ConfigureSense(*HearingConfig);
+    PerceptionComponentBis->RequestStimuliListenerUpdate();
 }
