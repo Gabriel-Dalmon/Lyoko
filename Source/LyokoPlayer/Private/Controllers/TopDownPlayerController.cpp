@@ -197,9 +197,10 @@ void ATopDownPlayerController::OnPlayerRestarted_Implementation()
 
 void ATopDownPlayerController::OnPossessedPawnDead()
 {
-    ALyokoGameModeBase *GameMode = Cast<ALyokoGameModeBase>(GetWorld()->GetAuthGameMode());
-    if (GameMode == nullptr) return;
-    GameMode->Respawn(this);
+    //TODO@g: Expose this to be overridable in BP
+    //ALyokoGameModeBase *GameMode = Cast<ALyokoGameModeBase>(GetWorld()->GetAuthGameMode());
+    //if (GameMode == nullptr) return;
+    //GameMode->Respawn(this);
 }
 
 void ATopDownPlayerController::Tick(float DeltaSeconds)
