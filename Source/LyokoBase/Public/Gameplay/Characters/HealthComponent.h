@@ -22,6 +22,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
 	float CurrentHealth;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Health")
+	float HealthHeartRatio = 100;
+
 	UPROPERTY(BlueprintAssignable, Category = "Health")
 	FOnHealthUpdatedEvent OnHealthUpdatedEvent;
 
