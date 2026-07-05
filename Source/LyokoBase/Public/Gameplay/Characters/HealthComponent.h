@@ -16,10 +16,10 @@ class LYOKOBASE_API UHealthComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health")
 	float MaxHealth;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health")
 	float CurrentHealth;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Health")
