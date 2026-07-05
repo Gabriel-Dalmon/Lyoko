@@ -49,6 +49,8 @@ void UHealthComponent::Heal(float HealAmount)
 
 void UHealthComponent::AddMaxHealth(float HealthAmount)
 {
+    const float PreviousHealth = CurrentHealth;
     MaxHealth += HealthAmount;
     CurrentHealth += HealthAmount;
+    OnHealthUpdatedEvent.Broadcast(PreviousHealth, CurrentHealth);
 }
