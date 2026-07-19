@@ -1,9 +1,15 @@
-// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
+// Copyright © 2026 Lyoko - 96 l'Art Cheperdu
+//     __                __       
+//    / /   __  ______  / /______ 
+//   / /   / / / / __ \/ //_/ __ \
+//  / /___/ /_/ / /_/ / ,< / /_/ /
+// /_____/\__, /\____/_/|_|\____/ 
+//       /____/                   
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Controllers/LyokoPlayerControllerBase.h"
+#include "Controllers/LyokoPlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "Templates/SubclassOf.h"
 #include "GameFramework/PlayerController.h"
@@ -18,7 +24,7 @@
  * 
  */
 UCLASS(Abstract)
-class LYOKOPLAYER_API ATopDownPlayerController : public ALyokoPlayerControllerBase, public IOnPlayerRestartedHook, public ICombatActor
+class LYOKOPLAYER_API ATopDownPlayerController : public ALyokoPlayerController, public IOnPlayerRestartedHook, public ICombatActor
 {
     GENERATED_BODY()
 
@@ -31,6 +37,13 @@ public:
 
     UPROPERTY(EditDefaultsOnly, Category = "Input|Movement|Actions")
     TSoftObjectPtr<class UInputAction> MovementInputAction;
+
+    /** Movement mapping context */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Look")
+    TSoftObjectPtr<class UInputMappingContext> LookInputMapping;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Input|Look|Actions")
+    TSoftObjectPtr<class UInputAction> LookInputAction;
 
     /** Interactions mapping context */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Interactions")
@@ -51,16 +64,23 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input|Mouse Look")
     bool bEnableMouseLook_TO_REVIEW = true;
 
+    UPROPERTY(BlueprintReadWrite, Category = "Input|Mouse Look")
+    bool bLookAtCursor = true;
+
 protected:
 
     virtual void SetupInputComponent() override;
 
     // To add mapping context
-    virtual void BeginPlay();
+    virtual void BeginPlay() override;
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Top Down Controller Callbacks")
     void OnMove(const FInputActionValue &Value);
     virtual void OnMove_Implementation(const FInputActionValue &Value);
+
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Top Down Controller Callbacks")
+    void OnLook(const FInputActionValue &Value);
+    virtual void OnLook_Implementation(const FInputActionValue &Value);
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Top Down Controller Callbacks")
     void OnPrimaryInteract(const FInputActionValue& Value);
@@ -81,14 +101,24 @@ public:
     void LookAtCursor();
     void SetControlRotationToCamera(const APawn &NewPawn);
 
+protected:
+    virtual void OnGamepadActive_Implementation() override;
+    virtual void OnMouseKeyboardActive_Implementation() override;
+
 public:
     inline virtual FVector GetAttackDirection_Implementation(FVector AttackOrigin) const
     {
-        FVector RayStart, RayDirection;
-        DeprojectMousePositionToWorld(RayStart, RayDirection);
-        FVector RayHitLocation = FMath::LinePlaneIntersection(RayStart, RayStart + RayDirection * 10000.0f, FVector(0.0f, 0.0f, AttackOrigin.Z), FVector::UpVector);
+        FVector Direction;
+        if (bLookAtCursor) {
+            FVector RayStart, RayDirection;
+            DeprojectMousePositionToWorld(RayStart, RayDirection);
+            FVector RayHitLocation = FMath::LinePlaneIntersection(RayStart, RayStart + RayDirection * 10000.0f, FVector(0.0f, 0.0f, AttackOrigin.Z), FVector::UpVector);
+            Direction = RayHitLocation - AttackOrigin;
+        }
+        else if (APawn *PossessedPawn = GetPawn(); PossessedPawn) {
+            Direction = PossessedPawn->GetActorRotation().Vector();
+        }
 
-        FVector Direction = RayHitLocation - AttackOrigin;
         Direction.Z = 0.0f;
         return Direction.GetSafeNormal();
     }

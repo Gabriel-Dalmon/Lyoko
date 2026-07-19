@@ -1,4 +1,10 @@
-// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
+// Copyright © 2026 Lyoko - 96 l'Art Cheperdu
+//     __                __       
+//    / /   __  ______  / /______ 
+//   / /   / / / / __ \/ //_/ __ \
+//  / /___/ /_/ / /_/ / ,< / /_/ /
+// /_____/\__, /\____/_/|_|\____/ 
+//       /____/                   
 
 #pragma once
 
@@ -9,24 +15,12 @@
 UCLASS(Abstract)
 class LYOKOBASE_API ALyokoCharacterBase : public ACharacter
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
-	TObjectPtr<class UHealthComponent > HealthComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+    TObjectPtr<class UHealthComponent > HealthComponent;
 
 public:
-	// Sets default values for this character's properties
-	ALyokoCharacterBase();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    ALyokoCharacterBase();
 };

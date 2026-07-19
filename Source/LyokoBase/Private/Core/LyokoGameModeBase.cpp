@@ -3,22 +3,22 @@
 
 #include "Core/LyokoGameModeBase.h"
 #include "Gameplay/Characters/LyokoCharacterBase.h"
-#include "Controllers/LyokoPlayerControllerBase.h"
+#include "Controllers/LyokoPlayerController.h"
 #include "Core/HooksInterfaces/OnPlayerRestartedHook.h"
 
 
-void ALyokoGameModeBase::Respawn(ALyokoPlayerControllerBase *Controller)
+void ALyokoGameModeBase::Respawn(ALyokoPlayerController *Controller)
 {
-	FTransform RespawnPoint = Controller->RespawnPoint;
-	if (RespawnPoint.IsValid() == false)
-	{
-		RespawnPoint = FTransform(FRotator(0, 0, 0), FVector(0, 0, 0));
-	}
+    FTransform RespawnPoint = Controller->RespawnPoint;
+    if (RespawnPoint.IsValid() == false)
+    {
+        RespawnPoint = FTransform(FRotator(0, 0, 0), FVector(0, 0, 0));
+    }
 
-	UWorld *World = GetWorld();
-	ALyokoCharacterBase *Character =
-		World->SpawnActor<ALyokoCharacterBase>(DefaultPawnClass, RespawnPoint.GetLocation(), RespawnPoint.GetRotation().Rotator());
-	Controller->Possess(Character);
+    UWorld *World = GetWorld();
+    ALyokoCharacterBase *Character =
+        World->SpawnActor<ALyokoCharacterBase>(DefaultPawnClass, RespawnPoint.GetLocation(), RespawnPoint.GetRotation().Rotator());
+    Controller->Possess(Character);
 }
 
 void ALyokoGameModeBase::FinishRestartPlayer(AController *NewPlayer, const FRotator &StartRotation)
@@ -29,6 +29,6 @@ void ALyokoGameModeBase::FinishRestartPlayer(AController *NewPlayer, const FRota
 
     if (NewPlayer->GetClass()->ImplementsInterface(UOnPlayerRestartedHook::StaticClass()))
     {
-		IOnPlayerRestartedHook::Execute_OnPlayerRestarted(NewPlayer);
+        IOnPlayerRestartedHook::Execute_OnPlayerRestarted(NewPlayer);
     }
 }

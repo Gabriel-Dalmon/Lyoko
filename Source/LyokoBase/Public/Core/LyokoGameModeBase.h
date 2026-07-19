@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "LyokoGameModeBase.generated.h"
 
-class ALyokoPlayerControllerBase;
+class ALyokoPlayerController;
 
 /**
  * 
@@ -14,12 +14,12 @@ class ALyokoPlayerControllerBase;
 UCLASS()
 class LYOKOBASE_API ALyokoGameModeBase : public AGameModeBase
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+    
 public:
-	void Respawn(ALyokoPlayerControllerBase *Controller);
+    void Respawn(ALyokoPlayerController *Controller);
 
 protected:
-	virtual void FinishRestartPlayer(AController *NewPlayer, const FRotator &StartRotation) override;
+    virtual void FinishRestartPlayer(AController *NewPlayer, const FRotator &StartRotation) override;
 
 };

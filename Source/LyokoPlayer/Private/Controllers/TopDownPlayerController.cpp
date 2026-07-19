@@ -16,6 +16,7 @@
 #include "Gameplay/Interactor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Gameplay/Characters/MovementCharacter.h"
+#include "InputDevices/LyokoInputDeviceSubsystem.h"
 
 
 
@@ -24,6 +25,15 @@ void ATopDownPlayerController::BeginPlay()
 {
     // Call the base class  
     Super::BeginPlay();
+
+    ULocalPlayer *LocalPlayer = GetLocalPlayer();
+    if (!LocalPlayer) return;
+
+    ULyokoInputDeviceSubsystem *InputDeviceSystem = LocalPlayer->GetSubsystem<ULyokoInputDeviceSubsystem>();
+    if (!InputDeviceSystem) return;
+
+    InputDeviceSystem->OnMouseKeyboardActive.AddDynamic(this, &ATopDownPlayerController::OnMouseKeyboardActive);
+    InputDeviceSystem->OnGamepadActive.AddDynamic(this, &ATopDownPlayerController::OnGamepadActive);
 }
 
 void ATopDownPlayerController::SetupInputComponent()
@@ -32,6 +42,7 @@ void ATopDownPlayerController::SetupInputComponent()
     Super::SetupInputComponent();
 
     BindInputMapping(MovementInputMapping);
+    BindInputMapping(LookInputMapping);
     BindInputMapping(InteractionsInputMapping);
 
     // Set up actions bindings
@@ -51,6 +62,15 @@ void ATopDownPlayerController::SetupInputComponent()
             ETriggerEvent::Triggered,
             this,
             &ATopDownPlayerController::OnMove
+        );
+    }
+    if (LookInputAction.IsNull() == false)
+    {
+        EnhancedInputComponent->BindAction(
+            LookInputAction.LoadSynchronous(),
+            ETriggerEvent::Triggered,
+            this,
+            &ATopDownPlayerController::OnLook
         );
     }
     if (PrimaryInteractInputAction.IsNull() == false)
@@ -106,6 +126,14 @@ void ATopDownPlayerController::OnMove_Implementation(const FInputActionValue &Va
     IMovementCharacter::Execute_Move(PossessedPawn, RotatedInput);
 }
 
+void ATopDownPlayerController::OnLook_Implementation(const FInputActionValue &Value)
+{
+    APawn *PossessedPawn = GetPawn();
+    if (PossessedPawn == nullptr) return;
+    const FVector2D Input = Value.Get<FVector2D>();
+    PossessedPawn->SetActorRotation(FVector(-Input.X, Input.Y, 0.f).Rotation());
+}
+
 void ATopDownPlayerController::OnPrimaryInteract_Implementation(const FInputActionValue& Value)
 {
     ForwardInteractionToPawn(EInteractionTypes::Primary);
@@ -159,6 +187,18 @@ void ATopDownPlayerController::SetControlRotationToCamera(const APawn &NewPawn)
     }
 }
 
+void ATopDownPlayerController::OnGamepadActive_Implementation()
+{
+    Super::OnGamepadActive_Implementation();
+    bLookAtCursor = false;
+}
+
+void ATopDownPlayerController::OnMouseKeyboardActive_Implementation()
+{
+    Super::OnMouseKeyboardActive_Implementation();
+    bLookAtCursor = true;
+}
+
 void ATopDownPlayerController::OnPossess(APawn *InPawn)
 {
     Super::OnPossess(InPawn);
@@ -207,7 +247,7 @@ void ATopDownPlayerController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
-    if (bEnableMouseLook_TO_REVIEW)
+    if (bLookAtCursor && bEnableMouseLook_TO_REVIEW)
     {
         LookAtCursor();
     }
