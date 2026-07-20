@@ -129,9 +129,11 @@ void ATopDownPlayerController::OnMove_Implementation(const FInputActionValue &Va
 void ATopDownPlayerController::OnLook_Implementation(const FInputActionValue &Value)
 {
     APawn *PossessedPawn = GetPawn();
-    if (PossessedPawn == nullptr) return;
+    const bool bIsMovementCharacter = PossessedPawn->GetClass()->ImplementsInterface(UMovementCharacter::StaticClass());
+    if (PossessedPawn == nullptr || bIsMovementCharacter == false) return;
     const FVector2D Input = Value.Get<FVector2D>();
-    PossessedPawn->SetActorRotation(FVector(-Input.X, Input.Y, 0.f).Rotation());
+
+    IMovementCharacter::Execute_Look(PossessedPawn, FVector(-Input.X, Input.Y, 0.f));
 }
 
 void ATopDownPlayerController::OnPrimaryInteract_Implementation(const FInputActionValue& Value)
@@ -166,14 +168,13 @@ void ATopDownPlayerController::LookAtCursor()
     if (bHit == false) return;
 
     APawn *PossessedPawn = GetPawn();
-    if (PossessedPawn == nullptr) return;
-    
-    FRotator CurrentCharacterRotation = PossessedPawn->GetActorRotation();
+    const bool bIsMovementCharacter = PossessedPawn->GetClass()->ImplementsInterface(UMovementCharacter::StaticClass());
+    if (PossessedPawn == nullptr || bIsMovementCharacter == false) return;
 
-    FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), OutHit.Location);
+    FVector LookDirection = OutHit.Location - PossessedPawn->GetActorLocation();
+    LookDirection.Z = 0.0f;
+    IMovementCharacter::Execute_Look(PossessedPawn, LookDirection);
 
-    FRotator NewRotation = FRotator(CurrentCharacterRotation.Pitch, PlayerRot.Yaw, PlayerRot.Roll);
-    PossessedPawn->SetActorRotation(NewRotation);
 }
 
 void ATopDownPlayerController::SetControlRotationToCamera(const APawn &NewPawn)

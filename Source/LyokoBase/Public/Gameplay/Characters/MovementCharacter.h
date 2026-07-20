@@ -30,4 +30,7 @@ public:
 public:
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Movement Character")
     void Move(const FVector2D &Direction);
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Movement Character")
+    void Look(const FVector &Direction);
 };
