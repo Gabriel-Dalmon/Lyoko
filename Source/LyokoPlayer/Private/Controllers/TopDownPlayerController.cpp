@@ -1,4 +1,4 @@
-// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
+// Copyright © 2025-2027 Lyoko - 96 l'Art Cheperdu
 
 #include "Controllers/TopDownPlayerController.h"
 #include "GameFramework/Pawn.h"
