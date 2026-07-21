@@ -2,14 +2,16 @@
 
 
 #include "Controllers/LyokoPlayerController.h"
-#include "InputMappingContext.h"
-#include "EnhancedInputSubsystems.h"
 #include "InputDevices/LyokoInputDeviceSubsystem.h"
 #include "Framework/Application/SlateApplication.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
+#include "InputAction.h"
+#include "EnhancedInputComponent.h"
 
+//----------------------------------------------------------------------------------------------------------------------
 void ALyokoPlayerController::BeginPlay()
 {
-    // Call the base class  
     Super::BeginPlay();
 
     ULocalPlayer *LocalPlayer = GetLocalPlayer();
@@ -34,47 +36,53 @@ void ALyokoPlayerController::BeginPlay()
     }
 }
 
-
-void ALyokoPlayerController::BindInputMapping(const TSoftObjectPtr<class UInputMappingContext>& InputMapping)
+//----------------------------------------------------------------------------------------------------------------------
+void ALyokoPlayerController::SetupInputComponent()
 {
-    ULocalPlayer *LocalPlayer = GetLocalPlayer();
-    if (!LocalPlayer) return;
+    Super::SetupInputComponent();
 
-    UEnhancedInputLocalPlayerSubsystem *InputSystem =
-        LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-    if (!InputSystem) return;
+    BindInputMapping(SystemInputMapping);
 
-    if (!InputMapping.IsNull() || !InputSystem->HasMappingContext(InputMapping.LoadSynchronous()))
-    {
-        InputSystem->AddMappingContext(
-            InputMapping.LoadSynchronous(), 0);
-    }
+    BindInputAction(PauseInputAction, &ALyokoPlayerController::TogglePause, ETriggerEvent::Started);
 }
 
-void ALyokoPlayerController::UnbindInputMapping(const TSoftObjectPtr<class UInputMappingContext>& InputMapping)
-{
-    ULocalPlayer *LocalPlayer = GetLocalPlayer();
-    if (!LocalPlayer) return;
-
-    UEnhancedInputLocalPlayerSubsystem *InputSystem =
-        LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-    if (!InputSystem) return;
-
-    if (!InputMapping.IsNull() && InputSystem->HasMappingContext(InputMapping.LoadSynchronous()))
-    {
-        InputSystem->RemoveMappingContext(
-            InputMapping.LoadSynchronous());
-    }
-}
-
+//----------------------------------------------------------------------------------------------------------------------
 void ALyokoPlayerController::OnGamepadActive_Implementation()
 {
     SetShowMouseCursor(false);
     FSlateApplication::Get().GetPlatformCursor()->Show(false);
 }
 
+//----------------------------------------------------------------------------------------------------------------------
 void ALyokoPlayerController::OnMouseKeyboardActive_Implementation()
 {
     SetShowMouseCursor(true);
     FSlateApplication::Get().GetPlatformCursor()->Show(true);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+bool ALyokoPlayerController::SetGamePaused(bool bPaused)
+{
+    if (bIsGamePaused == bPaused)
+    {
+        return false;
+    }
+
+    bIsGamePaused = bPaused;
+
+    if (bIsGamePaused)
+    {
+        OnGamePaused();
+    }
+    else {
+        OnGameResumed();
+    }
+
+    return true;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ALyokoPlayerController::TogglePause(const FInputActionValue &Value)
+{
+    SetGamePaused(!bIsGamePaused);
 }

@@ -32,5 +32,8 @@ public:
     void Move(const FVector2D &Direction);
 
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Movement Character")
+    void Dash(const FVector &Direction);
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Movement Character")
     void Look(const FVector &Direction);
 };

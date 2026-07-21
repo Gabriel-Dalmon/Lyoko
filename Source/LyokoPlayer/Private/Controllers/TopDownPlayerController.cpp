@@ -18,188 +18,24 @@
 #include "Gameplay/Characters/MovementCharacter.h"
 #include "InputDevices/LyokoInputDeviceSubsystem.h"
 
-
-
-
-void ATopDownPlayerController::BeginPlay()
-{
-    // Call the base class  
-    Super::BeginPlay();
-
-    ULocalPlayer *LocalPlayer = GetLocalPlayer();
-    if (!LocalPlayer) return;
-
-    ULyokoInputDeviceSubsystem *InputDeviceSystem = LocalPlayer->GetSubsystem<ULyokoInputDeviceSubsystem>();
-    if (!InputDeviceSystem) return;
-
-    InputDeviceSystem->OnMouseKeyboardActive.AddDynamic(this, &ATopDownPlayerController::OnMouseKeyboardActive);
-    InputDeviceSystem->OnGamepadActive.AddDynamic(this, &ATopDownPlayerController::OnGamepadActive);
-}
-
+//----------------------------------------------------------------------------------------------------------------------
 void ATopDownPlayerController::SetupInputComponent()
 {
-    // set up gameplay key bindings
     Super::SetupInputComponent();
 
     BindInputMapping(MovementInputMapping);
     BindInputMapping(LookInputMapping);
     BindInputMapping(InteractionsInputMapping);
 
-    // Set up actions bindings
-    UEnhancedInputComponent *EnhancedInputComponent =
-        Cast<UEnhancedInputComponent>(InputComponent);
-    if (EnhancedInputComponent == nullptr)
-    {
-        UE_LOG(LogTemp, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
-        return;
-    }
-
-#pragma region ActionsBinding
-    if (MovementInputAction.IsNull() == false)
-    {
-        EnhancedInputComponent->BindAction(
-            MovementInputAction.LoadSynchronous(),
-            ETriggerEvent::Triggered,
-            this,
-            &ATopDownPlayerController::OnMove
-        );
-    }
-    if (LookInputAction.IsNull() == false)
-    {
-        EnhancedInputComponent->BindAction(
-            LookInputAction.LoadSynchronous(),
-            ETriggerEvent::Triggered,
-            this,
-            &ATopDownPlayerController::OnLook
-        );
-    }
-    if (PrimaryInteractInputAction.IsNull() == false)
-    {
-        EnhancedInputComponent->BindAction(
-            PrimaryInteractInputAction.LoadSynchronous(),
-            ETriggerEvent::Triggered,
-            this,
-            &ATopDownPlayerController::OnPrimaryInteract
-        );
-    }
-    if (PrimaryInteractInputAction.IsNull() == false)
-    {
-        EnhancedInputComponent->BindAction(
-            SecondaryInteractInputAction.LoadSynchronous(),
-            ETriggerEvent::Triggered,
-            this,
-            &ATopDownPlayerController::OnSecondaryInteract
-        );
-    }
-    if (PrimaryInteractInputAction.IsNull() == false)
-    {
-        EnhancedInputComponent->BindAction(
-            SecondaryInteractInputAction.LoadSynchronous(),
-            ETriggerEvent::Triggered,
-            this,
-            &ATopDownPlayerController::OnTernaryInteract
-        );
-    }
-    if (PauseInputAction.IsNull() == false)
-    {
-        EnhancedInputComponent->BindAction(
-            PauseInputAction.LoadSynchronous(),
-            ETriggerEvent::Triggered,
-            this,
-            &ATopDownPlayerController::PauseGame
-        );
-    }
-#pragma endregion ActionsBinding	
+    BindInputAction(MovementInputAction, &ATopDownPlayerController::OnMove);
+    BindInputAction(DashInputAction, &ATopDownPlayerController::OnDash);
+    BindInputAction(LookInputAction, &ATopDownPlayerController::OnLook);
+    BindInputAction(PrimaryInteractInputAction, &ATopDownPlayerController::OnPrimaryInteract);
+    BindInputAction(SecondaryInteractInputAction, &ATopDownPlayerController::OnSecondaryInteract);
+    BindInputAction(TernaryInteractInputAction, &ATopDownPlayerController::OnTernaryInteract);
 }
 
-void ATopDownPlayerController::OnMove_Implementation(const FInputActionValue &Value)
-{
-    APawn *PossessedPawn = GetPawn();
-    const bool bIsMovementCharacter = PossessedPawn->GetClass()->ImplementsInterface(UMovementCharacter::StaticClass());
-    if (PossessedPawn == nullptr || bIsMovementCharacter == false) return;
-
-    const FVector2D Input = Value.Get<FVector2D>();
-    const float Yaw = GetControlRotation().Yaw;
-
-    const FVector2D RotatedInput = Input.GetRotated(Yaw);
-
-    IMovementCharacter::Execute_Move(PossessedPawn, RotatedInput);
-}
-
-void ATopDownPlayerController::OnLook_Implementation(const FInputActionValue &Value)
-{
-    APawn *PossessedPawn = GetPawn();
-    const bool bIsMovementCharacter = PossessedPawn->GetClass()->ImplementsInterface(UMovementCharacter::StaticClass());
-    if (PossessedPawn == nullptr || bIsMovementCharacter == false) return;
-    const FVector2D Input = Value.Get<FVector2D>();
-
-    IMovementCharacter::Execute_Look(PossessedPawn, FVector(-Input.X, Input.Y, 0.f));
-}
-
-void ATopDownPlayerController::OnPrimaryInteract_Implementation(const FInputActionValue& Value)
-{
-    ForwardInteractionToPawn(EInteractionTypes::Primary);
-}
-
-void ATopDownPlayerController::OnSecondaryInteract_Implementation(const FInputActionValue& Value)
-{
-    ForwardInteractionToPawn(EInteractionTypes::Secondary);
-}
-
-void ATopDownPlayerController::OnTernaryInteract_Implementation(const FInputActionValue& Value)
-{
-    ForwardInteractionToPawn(EInteractionTypes::Ternary);
-}
-
-void ATopDownPlayerController::ForwardInteractionToPawn(EInteractionTypes Type) const
-{
-    APawn* PossessedPawn = GetPawn();
-
-    if (PossessedPawn && PossessedPawn->Implements<UInteractor>())
-    {
-        IInteractor::Execute_Interact(PossessedPawn, Type);
-    }
-}
-
-void ATopDownPlayerController::LookAtCursor()
-{
-    FHitResult OutHit;
-    const bool bHit = GetHitResultUnderCursor(ECC_GameTraceChannel1, true, OutHit);
-    if (bHit == false) return;
-
-    APawn *PossessedPawn = GetPawn();
-    const bool bIsMovementCharacter = PossessedPawn->GetClass()->ImplementsInterface(UMovementCharacter::StaticClass());
-    if (PossessedPawn == nullptr || bIsMovementCharacter == false) return;
-
-    FVector LookDirection = OutHit.Location - PossessedPawn->GetActorLocation();
-    LookDirection.Z = 0.0f;
-    IMovementCharacter::Execute_Look(PossessedPawn, LookDirection);
-
-}
-
-void ATopDownPlayerController::SetControlRotationToCamera(const APawn &NewPawn)
-{
-    if (UCameraComponent *CameraComponent = NewPawn.FindComponentByClass<UCameraComponent>())
-    {
-        FRotator CameraRotation = CameraComponent->GetComponentRotation();
-        CameraRotation.Pitch = 0.0f;
-        CameraRotation.Roll = 0.0f;
-        SetControlRotation(CameraRotation);
-    }
-}
-
-void ATopDownPlayerController::OnGamepadActive_Implementation()
-{
-    Super::OnGamepadActive_Implementation();
-    bLookAtCursor = false;
-}
-
-void ATopDownPlayerController::OnMouseKeyboardActive_Implementation()
-{
-    Super::OnMouseKeyboardActive_Implementation();
-    bLookAtCursor = true;
-}
-
+//----------------------------------------------------------------------------------------------------------------------
 void ATopDownPlayerController::OnPossess(APawn *InPawn)
 {
     Super::OnPossess(InPawn);
@@ -216,6 +52,7 @@ void ATopDownPlayerController::OnPossess(APawn *InPawn)
     }
 }
 
+//----------------------------------------------------------------------------------------------------------------------
 void ATopDownPlayerController::OnUnPossess()
 {
     Super::OnUnPossess();
@@ -223,27 +60,7 @@ void ATopDownPlayerController::OnUnPossess()
     SetActorTickEnabled(false);
 }
 
-/** OnPlayerRestarted by LyokoGameModeBase at the end of the RestartPlayer method. 
-* For the TopDownPlayerController, the control rotation needs to be set to the camera direction
-* on new pawn possessed. However, part of the RestartPlayer logic overrides the control rotation after
-* OnPossess has been called.
-*/
-void ATopDownPlayerController::OnPlayerRestarted_Implementation()
-{
-    const APawn* PossessedPawn = GetPawn();
-    if (PossessedPawn == nullptr) return;
-
-    SetControlRotationToCamera(*PossessedPawn);
-}
-
-void ATopDownPlayerController::OnPossessedPawnDead()
-{
-    //TODO@g: Expose this to be overridable in BP
-    //ALyokoGameModeBase *GameMode = Cast<ALyokoGameModeBase>(GetWorld()->GetAuthGameMode());
-    //if (GameMode == nullptr) return;
-    //GameMode->Respawn(this);
-}
-
+//----------------------------------------------------------------------------------------------------------------------
 void ATopDownPlayerController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
@@ -253,3 +70,170 @@ void ATopDownPlayerController::Tick(float DeltaSeconds)
         LookAtCursor();
     }
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+/** 
+ * @brief Called by LyokoGameModeBase at the end of the RestartPlayer method.
+ * The possessed pawn is expected to use the Control Rotation. 
+ * It is computed based on the camera direction to ensure topdown movement to be aligned with the view.
+ * Part of the RestartPlayer logic overrides the control rotation after OnPossess has been called. This method is used as
+ * hook when Control Rotation is no longer overriden by Unreal internal logic.
+ */
+void ATopDownPlayerController::OnPlayerRestarted_Implementation()
+{
+    const APawn *PossessedPawn = GetPawn();
+    if (PossessedPawn == nullptr) return;
+
+    SetControlRotationToCamera(*PossessedPawn);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::OnPossessedPawnDead_Implementation()
+{
+    //ALyokoGameModeBase *GameMode = Cast<ALyokoGameModeBase>(GetWorld()->GetAuthGameMode());
+    //if (GameMode == nullptr) return;
+    //GameMode->Respawn(this);
+}
+
+#pragma region Movement
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::OnMove_Implementation(const FInputActionValue &Value)
+{
+    APawn *PossessedPawn = GetPawn();
+    const bool bIsMovementCharacter = PossessedPawn->GetClass()->ImplementsInterface(UMovementCharacter::StaticClass());
+    if (PossessedPawn == nullptr || bIsMovementCharacter == false) return;
+
+    const FVector2D Input = Value.Get<FVector2D>();
+    const float Yaw = GetControlRotation().Yaw;
+
+    const FVector2D RotatedInput = Input.GetRotated(Yaw);
+
+    IMovementCharacter::Execute_Move(PossessedPawn, RotatedInput);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::OnDash_Implementation(const FInputActionValue &Value)
+{
+    APawn *PossessedPawn = GetPawn();
+    const bool bIsMovementCharacter = PossessedPawn->GetClass()->ImplementsInterface(UMovementCharacter::StaticClass());
+    if (PossessedPawn == nullptr || bIsMovementCharacter == false) return;
+    FVector Direction = IMovementCharacter::Execute_GetMovementVelocity(PossessedPawn).GetSafeNormal();
+    IMovementCharacter::Execute_Dash(PossessedPawn, Direction);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::SetControlRotationToCamera(const APawn &NewPawn)
+{
+    if (UCameraComponent *CameraComponent = NewPawn.FindComponentByClass<UCameraComponent>())
+    {
+        FRotator CameraRotation = CameraComponent->GetComponentRotation();
+        CameraRotation.Pitch = 0.0f;
+        CameraRotation.Roll = 0.0f;
+        SetControlRotation(CameraRotation);
+    }
+}
+#pragma endregion Movement
+
+#pragma region Look
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::OnLook_Implementation(const FInputActionValue &Value)
+{
+    APawn *PossessedPawn = GetPawn();
+    const bool bIsMovementCharacter = PossessedPawn->GetClass()->ImplementsInterface(UMovementCharacter::StaticClass());
+    if (PossessedPawn == nullptr || bIsMovementCharacter == false) return;
+    const FVector2D Input = Value.Get<FVector2D>();
+
+    IMovementCharacter::Execute_Look(PossessedPawn, FVector(-Input.X, Input.Y, 0.f));
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::LookAtCursor()
+{
+    FHitResult OutHit;
+    const bool bHit = GetHitResultUnderCursor(ECC_GameTraceChannel1, true, OutHit);
+    if (bHit == false) return;
+
+    APawn *PossessedPawn = GetPawn();
+    const bool bIsMovementCharacter = PossessedPawn->GetClass()->ImplementsInterface(UMovementCharacter::StaticClass());
+    if (PossessedPawn == nullptr || bIsMovementCharacter == false) return;
+
+    FVector LookDirection = OutHit.Location - PossessedPawn->GetActorLocation();
+    LookDirection.Z = 0.0f;
+    IMovementCharacter::Execute_Look(PossessedPawn, LookDirection);
+}
+#pragma endregion Look
+
+#pragma region Interactions
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::OnPrimaryInteract_Implementation(const FInputActionValue& Value)
+{
+    ForwardInteractionToPawn(EInteractionTypes::Primary);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::OnSecondaryInteract_Implementation(const FInputActionValue& Value)
+{
+    ForwardInteractionToPawn(EInteractionTypes::Secondary);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::OnTernaryInteract_Implementation(const FInputActionValue& Value)
+{
+    ForwardInteractionToPawn(EInteractionTypes::Ternary);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::ForwardInteractionToPawn(EInteractionTypes Type) const
+{
+    APawn* PossessedPawn = GetPawn();
+
+    if (PossessedPawn && PossessedPawn->Implements<UInteractor>())
+    {
+        IInteractor::Execute_Interact(PossessedPawn, Type);
+    }
+}
+#pragma endregion Interactions
+
+#pragma region Combat
+//----------------------------------------------------------------------------------------------------------------------
+FVector ATopDownPlayerController::GetAttackDirection_Implementation(FVector AttackOrigin) const
+{
+    FVector Direction;
+    if (bLookAtCursor) {
+        FVector RayStart, RayDirection;
+        DeprojectMousePositionToWorld(RayStart, RayDirection);
+        FVector RayHitLocation = FMath::LinePlaneIntersection(RayStart, RayStart + RayDirection * 10000.0f, FVector(0.0f, 0.0f, AttackOrigin.Z), FVector::UpVector);
+        Direction = RayHitLocation - AttackOrigin;
+    }
+    else if (APawn *PossessedPawn = GetPawn(); PossessedPawn) {
+        Direction = PossessedPawn->GetActorRotation().Vector();
+    }
+
+    Direction.Z = 0.0f;
+    return Direction.GetSafeNormal();
+}
+#pragma endregion Combat
+
+#pragma region Pause
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::OnGamePaused_Implementation()
+{
+    Super::OnGamePaused_Implementation();
+    //TODO@g: Show pause menu
+    SetMouseCursorWidget(EMouseCursor::Default, nullptr);
+    UnbindInputMapping(MovementInputMapping);
+    UnbindInputMapping(LookInputMapping);
+    UnbindInputMapping(InteractionsInputMapping);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ATopDownPlayerController::OnGameResumed_Implementation()
+{
+    Super::OnGameResumed_Implementation();
+    //TODO@g: Hide pause menu
+    SetMouseCursorWidget(EMouseCursor::Crosshairs, nullptr);
+    BindInputMapping(MovementInputMapping);
+    BindInputMapping(LookInputMapping);
+    BindInputMapping(InteractionsInputMapping);
+}
+#pragma endregion Pause
