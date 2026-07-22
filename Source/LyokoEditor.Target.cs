@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 public class LyokoEditorTarget : TargetRules
 {
-	public LyokoEditorTarget( TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Editor;
-		DefaultBuildSettings = BuildSettingsVersion.V5;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
-		ExtraModuleNames.Add("Lyoko");
-	}
+    public LyokoEditorTarget( TargetInfo Target) : base(Target)
+    {
+        Type = TargetType.Editor;
+        DefaultBuildSettings = BuildSettingsVersion.V7;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_8;
+        ExtraModuleNames.Add("Lyoko");
+    }
 }
