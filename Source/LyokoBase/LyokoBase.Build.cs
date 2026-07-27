@@ -16,6 +16,7 @@ public class LyokoBase : ModuleRules
             "EnhancedInput",
             "Slate",
             "SlateCore",
+            "GameplayTags",
             "Niagara"
         });
     }

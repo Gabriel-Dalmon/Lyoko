@@ -89,7 +89,7 @@ void AHumanoidCharacter::Interact_Implementation(EInteractionTypes Type)
 void AHumanoidCharacter::PrimaryInteract_Implementation()
 {
     if (MainItem && MainItem->Implements<UInteractable>()) {
-        IInteractable::Execute_OnInteracted(MainItem, EInteractionTypes::Primary);
+        IInteractable::Execute_Interact(MainItem, EInteractionTypes::Primary);
     }
 }
 

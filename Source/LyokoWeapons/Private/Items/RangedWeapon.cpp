@@ -2,18 +2,49 @@
 
 
 #include "Items/RangedWeapon.h"
+#include "Items/RangedWeaponData.h"
+#include "Items/WeaponRules.h"
 
+void ARangedWeapon::OnSecondaryInteracted_Implementation()
+{
+    Reload();
+}
 
 /**
-* Fire a projectile using default weapon settings
+* @param Direction - Direction in which to attack
 */
-void ARangedWeapon::Fire_Implementation()
+void ARangedWeapon::AttackInDirection_Implementation(const FVector &Direction)
 {
-    const FVector OffsetFromMuzzle = FVector(0.f);
-    const FTransform MuzzleTransform = GetMuzzleTransform();
-    const FVector FireDirection = MuzzleTransform.GetRotation().GetForwardVector();
-    const float InitialSpeed = GetProjectileDefaultInitialSpeed();
-    Fire(OffsetFromMuzzle, FireDirection, InitialSpeed);
+    FireInDirection(Direction);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+bool ARangedWeapon::IsAttackAvailable_Implementation() const
+{
+    return ItemTags.HasAny(WeaponRules::IsFireDisabledTags) && Super::IsAttackAvailable_Implementation();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+FVector ARangedWeapon::GetDefaultAttackDirection_Implementation() const
+{
+    return GetMuzzleTransform(ERelativeTransformSpace::RTS_World).GetRotation().GetForwardVector();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ARangedWeapon::OnAmmunitionEmpty_Implementation()
+{
+    ItemTags.AddTag(TAG_Weapon_OutOfAmmo);
+    if (bAutomaticReload)
+    {
+        Reload();
+    }
+    OnAmmunitionEmptyEvent.Broadcast();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+bool ARangedWeapon::IsFireAvailable_Implementation() const
+{
+    return WeaponRules::IsFireDisabledTags.IsEmpty() || !ItemTags.HasAny(WeaponRules::IsFireDisabledTags);
 }
 
 /**
@@ -35,7 +66,8 @@ void ARangedWeapon::Fire(const FVector &OffsetFromMuzzle, const FVector &Directi
 */
 void ARangedWeapon::Fire(const FVector &OffsetFromMuzzle, const FVector & Direction, const float InitialSpeed)
 {
-    if (ProjectileClass == nullptr) return;
+    auto WeaponData = GetRangedWeaponData();
+    TSubclassOf<AProjectileBase> ProjectileClass = WeaponData->ProjectileClass;
 
     const FTransform MuzzleTransform = GetMuzzleTransform();
     const FVector MuzzleLocation = MuzzleTransform.GetLocation();
@@ -52,6 +84,7 @@ void ARangedWeapon::Fire(const FVector &OffsetFromMuzzle, const FVector & Direct
     check(GetWorld());
     check(!SpawnLocation.ContainsNaN());
     check(!MuzzleRotation.ContainsNaN());
+    //TODO@g: Spawn deferred and apply Velocity and DamageMultiplier before spawning.
     AProjectileBase *Projectile = World->SpawnActor<AProjectileBase>(
         ProjectileClass, 
         SpawnLocation, 
@@ -65,31 +98,120 @@ void ARangedWeapon::Fire(const FVector &OffsetFromMuzzle, const FVector & Direct
     {
         const FVector InitialVelocity = Direction * InitialSpeed;
         Projectile->GetProjectileMovement()->Velocity = InitialVelocity;
+        Projectile->BakedDamageMultiplier = ComputeDamageMultiplier_Implementation();
+        --CurrentAmmunitionCount;
+
+        if (CurrentAmmunitionCount <= 0)
+        {
+            OnAmmunitionEmpty();
+        }
+        OnFired(Projectile);
     }
 }
 
-/**
-*/
+//----------------------------------------------------------------------------------------------------------------------
 void ARangedWeapon::FireInDirection_Implementation(const FVector& Direction)
 {
     const FVector OffsetFromMuzzle = FVector(0.f);
     Fire(OffsetFromMuzzle, Direction);
 }
 
-/**
-* Perform an attack with the weapon
-*/
-void ARangedWeapon::Attack_Implementation()
+void ARangedWeapon::OnFired_Implementation(AProjectileBase *Projectile)
 {
-    Fire();
 }
 
-/**
-* @param Direction - Direction in which to attack
-*/
-void ARangedWeapon::AttackInDirection_Implementation(const FVector& Direction)
+//----------------------------------------------------------------------------------------------------------------------
+float ARangedWeapon::ComputeDamageMultiplier_Implementation() const
 {
-    FireInDirection(Direction);
+    float BaseMultiplier = Super::ComputeDamageMultiplier_Implementation();
+    auto WeaponData = GetRangedWeaponData();
+    if (!WeaponData) [[unlikely]] return BaseMultiplier;
+
+    return BaseMultiplier * WeaponData->DamageModifier;
+}
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool ARangedWeapon::IsReloading() const
+{
+    return ItemTags.HasTag(TAG_Weapon_Reloading);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+bool ARangedWeapon::IsReloadAvailable_Implementation() const
+{
+    return WeaponRules::IsReloadDisabledTags.IsEmpty() || !ItemTags.HasAny(WeaponRules::IsReloadDisabledTags);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ARangedWeapon::Reload()
+{
+    auto WeaponData = GetRangedWeaponData();
+    switch (WeaponData->ReloadPattern)
+    {
+    case EReloadPattern::Complete:
+        ReloadMax();
+        break;
+    case EReloadPattern::Incremental:
+        ReloadBatch(WeaponData->ReloadBatchSize);
+        break;
+    default:
+        break;
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ARangedWeapon::ReloadMax()
+{
+    ReloadBatch(GetRangedWeaponData()->Capacity);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ARangedWeapon::ReloadBatch(int BatchSize)
+{
+    if (!IsReloadAvailable()) return;
+    ensureMsgf(BatchSize > 0, TEXT("%s: Invalid batch size %d!"), *ARangedWeapon::StaticClass()->GetName(), BatchSize);
+
+    auto WeaponData = GetRangedWeaponData();
+    const float ReloadDuration = WeaponData->ReloadDuration;
+    const int SafeBatchSize = FMath::Clamp(BatchSize, 1, WeaponData->Capacity - CurrentAmmunitionCount);
+
+    ItemTags.AddTag(TAG_Weapon_Reloading);
+    OnReloadStarted();
+
+    GetWorldTimerManager().SetTimer(ReloadTimerHandle, [this, ReloadDuration, SafeBatchSize]()
+        {
+            ItemTags.RemoveTag(TAG_Weapon_Reloading);
+            ItemTags.RemoveTag(TAG_Weapon_OutOfAmmo);
+            CurrentAmmunitionCount = SafeBatchSize;
+            OnReloaded(SafeBatchSize);
+        }, ReloadDuration, false);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ARangedWeapon::CancelReload()
+{
+    if (!IsReloading()) return;
+    GetWorldTimerManager().ClearTimer(ReloadTimerHandle);
+    ItemTags.RemoveTag(TAG_Weapon_Reloading);
+    OnReloadCanceled();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ARangedWeapon::OnReloadStarted_Implementation()
+{
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ARangedWeapon::OnReloaded_Implementation(int BatchSize)
+{
+    OnReloadedEvent.Broadcast(BatchSize);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void ARangedWeapon::OnReloadCanceled_Implementation()
+{
 }
 
 /**
@@ -111,7 +233,9 @@ FTransform ARangedWeapon::GetMuzzleTransform(ERelativeTransformSpace TransformSp
 */
 float ARangedWeapon::GetProjectileDefaultInitialSpeed() const
 {
-    if (ProjectileClass == nullptr) return 0.f;
+    auto WeaponData = GetRangedWeaponData();
+    TSubclassOf<AProjectileBase> ProjectileClass = WeaponData->ProjectileClass;
+
     AProjectileBase *DefaultProjectileObject = ProjectileClass.GetDefaultObject();
     return DefaultProjectileObject->GetProjectileMovement()->InitialSpeed;
 }
@@ -120,7 +244,10 @@ float ARangedWeapon::GetProjectileDefaultInitialSpeed() const
 */
 float ARangedWeapon::GetProjectileRadius() const
 {
-    if (ProjectileClass == nullptr) return 0.f;
+    auto WeaponData = GetRangedWeaponData();
+    TSubclassOf<AProjectileBase> ProjectileClass = WeaponData->ProjectileClass;
+
     AProjectileBase *DefaultProjectileObject = ProjectileClass.GetDefaultObject();
     return DefaultProjectileObject->GetCollisionComp()->GetScaledSphereRadius();
 }
+

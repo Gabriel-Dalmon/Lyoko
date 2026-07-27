@@ -38,10 +38,10 @@ public:
     virtual void BeginPlay() override;
     virtual void SetupInputComponent() override;
 
-protected:
     //------------------------------------------------------------------------------------------------------------------
     // Input Device Changes
     //------------------------------------------------------------------------------------------------------------------
+protected:
     /** 
      * @brief Called when the gamepad becomes the active input device. This function can be overridden in Blueprints or C++ to handle gamepad-specific logic.
      */
