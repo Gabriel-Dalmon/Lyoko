@@ -1,6 +1,9 @@
 # Visual Studio 2015 user specific files
 .vs/
 
+# VisualStudioTools Plugin
+Plugins/VisualStudioTools
+
 # Compiled Object files
 *.slo
 *.lo
