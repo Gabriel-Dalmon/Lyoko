@@ -9,13 +9,13 @@
 UCLASS(Abstract)
 class LYOKOBASE_API AItemBase : public AActor
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+    
 protected:
-	/* Mesh Component */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> MeshComponent;
+    /* Mesh Component */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UStaticMeshComponent> MeshComponent;
 
 public:
-	AItemBase();
+    AItemBase();
 };

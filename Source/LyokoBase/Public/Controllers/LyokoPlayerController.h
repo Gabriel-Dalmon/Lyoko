@@ -1,4 +1,4 @@
-// Copyright © 2025-2027 Lyoko - 96 l'Art Cheperdu
+// Copyright ï¿½ 2025-2027 Lyoko - 96 l'Art Cheperdu
 //     __                __       
 //    / /   __  ______  / /______ 
 //   / /   / / / / __ \/ //_/ __ \

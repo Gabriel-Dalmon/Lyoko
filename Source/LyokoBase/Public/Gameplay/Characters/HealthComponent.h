@@ -1,4 +1,4 @@
-// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
+// Copyright ï¿½ 2025 Lyoko - 96 l'Art Cheperdu
 
 #pragma once
 
@@ -13,37 +13,37 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResurectEvent);
 UCLASS(Blueprintable, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class LYOKOBASE_API UHealthComponent : public UActorComponent
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-public:	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health")
-	float MaxHealth;
+public:    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health")
+    float MaxHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health")
-	float CurrentHealth;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health")
+    float CurrentHealth;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Health")
-	float HealthHeartRatio = 100;
+    UPROPERTY(BlueprintReadWrite, Category = "Health")
+    float HealthHeartRatio = 100;
 
-	UPROPERTY(BlueprintAssignable, Category = "Health")
-	FOnHealthUpdatedEvent OnHealthUpdatedEvent;
+    UPROPERTY(BlueprintAssignable, Category = "Health")
+    FOnHealthUpdatedEvent OnHealthUpdatedEvent;
 
-	UPROPERTY(BlueprintAssignable, Category = "Health")
-	FOnDeadEvent OnDeadEvent;
+    UPROPERTY(BlueprintAssignable, Category = "Health")
+    FOnDeadEvent OnDeadEvent;
 
-	UPROPERTY(BlueprintAssignable, Category = "Health")
-	FOnResurectEvent OnResurectEvent;
-
-public:
-	UHealthComponent();
+    UPROPERTY(BlueprintAssignable, Category = "Health")
+    FOnResurectEvent OnResurectEvent;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Health")
-	void TakeDamage(float DamageAmount);
+    UHealthComponent();
 
-	UFUNCTION(BlueprintCallable, Category = "Health")
-	void Heal(float HealAmount);
+public:
+    UFUNCTION(BlueprintCallable, Category = "Health")
+    void TakeDamage(float DamageAmount);
 
-	UFUNCTION(BlueprintCallable, Category = "Health")
-	void AddMaxHealth(float HealthAmount);
+    UFUNCTION(BlueprintCallable, Category = "Health")
+    void Heal(float HealAmount);
+
+    UFUNCTION(BlueprintCallable, Category = "Health")
+    void AddMaxHealth(float HealthAmount);
 };

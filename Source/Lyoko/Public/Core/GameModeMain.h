@@ -12,6 +12,6 @@
 UCLASS()
 class LYOKO_API AGameModeMain : public ALyokoGameModeBase
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+    
 };

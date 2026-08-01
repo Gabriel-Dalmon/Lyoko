@@ -1,4 +1,4 @@
-// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
+// Copyright ï¿½ 2025 Lyoko - 96 l'Art Cheperdu
 
 #pragma once
 
@@ -13,7 +13,7 @@ class IPickuper;
 UINTERFACE(MinimalAPI)
 class UPickupable : public UInterface
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 };
 
 /**
@@ -21,28 +21,28 @@ class UPickupable : public UInterface
  */
 class LYOKOBASE_API IPickupable
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickupable")
-	void OnPickedUp(const TScriptInterface<IPickuper>& Pickuper);
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickupable")
+    void OnPickedUp(const TScriptInterface<IPickuper>& Pickuper);
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickupable")
-	TScriptInterface<IPickuper> GetCarrier() const;
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickupable")
+    TScriptInterface<IPickuper> GetCarrier() const;
 
-	
+    
 #pragma region METHODS_WITH_DEFAULT_IMPLEMENTATIONS
 public:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickupable")
-	bool IsCarried() const;
-	virtual bool IsCarried_Implementation() const;
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickupable")
+    bool IsCarried() const;
+    virtual bool IsCarried_Implementation() const;
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickupable")
-	bool CanBeStolen(const TScriptInterface<IPickuper>& Stealer) const;
-	virtual bool CanBeStolen_Implementation(const TScriptInterface<IPickuper>& Stealer) const;
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickupable")
+    bool CanBeStolen(const TScriptInterface<IPickuper>& Stealer) const;
+    virtual bool CanBeStolen_Implementation(const TScriptInterface<IPickuper>& Stealer) const;
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickupable")
-	void OnStolen(const TScriptInterface<IPickuper>& Stealer);
-	virtual void OnStolen_Implementation(const TScriptInterface<IPickuper>& Stealer);
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickupable")
+    void OnStolen(const TScriptInterface<IPickuper>& Stealer);
+    virtual void OnStolen_Implementation(const TScriptInterface<IPickuper>& Stealer);
 #pragma endregion METHODS_WITH_DEFAULT_IMPLEMENTATIONS
 };

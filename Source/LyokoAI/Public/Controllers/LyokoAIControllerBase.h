@@ -1,4 +1,4 @@
-// Copyright © 2026 Lyoko - 96 l'Art Cheperdu
+// Copyright ï¿½ 2026 Lyoko - 96 l'Art Cheperdu
 
 #pragma once
 

@@ -1,4 +1,4 @@
-// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
+// Copyright ï¿½ 2025 Lyoko - 96 l'Art Cheperdu
 
 #pragma once
 
@@ -10,7 +10,7 @@
 UINTERFACE(MinimalAPI)
 class UOnPlayerRestartedHook : public UInterface
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 };
 
 /**
@@ -19,10 +19,10 @@ class UOnPlayerRestartedHook : public UInterface
  */
 class LYOKOBASE_API IOnPlayerRestartedHook
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	/** Called when the player has finished restarting. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player Restart")
-	void OnPlayerRestarted();
+    /** Called when the player has finished restarting. */
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player Restart")
+    void OnPlayerRestarted();
 };

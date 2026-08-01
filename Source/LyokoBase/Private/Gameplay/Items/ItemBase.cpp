@@ -5,8 +5,8 @@
 
 AItemBase::AItemBase()
 {
-	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent")));
+    SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent")));
 
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	MeshComponent->SetupAttachment(RootComponent);
+    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+    MeshComponent->SetupAttachment(RootComponent);
 }
