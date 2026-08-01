@@ -19,5 +19,14 @@ public class LyokoBase : ModuleRules
             "GameplayTags",
             "Niagara"
         });
+
+        if (Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.AddRange(new string[]
+            {
+        "Slate",
+        "SlateCore"
+            });
+        }
     }
 }
