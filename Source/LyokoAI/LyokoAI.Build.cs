@@ -11,6 +11,7 @@ public class LyokoAI : ModuleRules
             "DeveloperSettings",
             "InputCore",
             "EnhancedInput",
+            "AIModule",
             "LyokoBase"
         });
     }
