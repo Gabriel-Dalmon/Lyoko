@@ -1,30 +1,44 @@
-// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
+// Copyright © 2025-2027 Lyoko - 96 l'Art Cheperdu
 
+//----------------------------------------------------------------------------------------------------------------------
 #include "Gameplay/Items/Item.h"
 #include "Gameplay/Items/DroppedItemContainer.h"
 #include "Gameplay/Pickuper.h"
 #include "Gameplay/Dropper.h"
 
-
 #if WITH_EDITOR
+//----------------------------------------------------------------------------------------------------------------------.
 void AItem::PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
 
-    if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(AItem, ItemDataAsset))
+    if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(AItem, ItemDefinition))
     {
-        if (!IsItemDataAssetValid())
+        if (!IsItemDefinitionValid())
         {
-            UE_LOG(LogTemp, Warning, TEXT("Only %s or derived is allowed. Resetting."), *GetMinimumItemDataClass()->GetName());
-            ItemDataAsset = nullptr;
+            FMessageLog("PIE").Error(FText::Format(
+                NSLOCTEXT("LyokoBase", "InvalidItemDefinition", "{0}: Invalid ItemDefinition!"),
+                FText::FromString(GetName())));
         }
     }
 }
 #endif
 
-bool AItem::IsItemDataAssetValid() const
+//----------------------------------------------------------------------------------------------------------------------
+bool AItem::IsItemDefinitionValid() const
 {
-    return ItemDataAsset && ItemDataAsset->IsA(GetMinimumItemDataClass());
+    if (!ItemDefinition)
+    {
+        UE_LOG(LogTemp, Error, TEXT("%s: ItemDefinition is not set!"), *AItem::StaticClass()->GetName());
+        return false;
+    }
+    const auto MandatoryProperties = GetMandatoryProperties();
+    if (!ItemDefinition->HasProperties(MandatoryProperties))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%s: ItemDefinition is missing mandatory properties!"), *AItem::StaticClass()->GetName());
+        return false;
+    }
+    return true;
 }
 
 /**

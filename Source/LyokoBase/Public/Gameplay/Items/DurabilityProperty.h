@@ -10,7 +10,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 #include "CoreMinimal.h"
-#include "Gameplay/Items/ItemProperty.h"
+#include "Model/LyokoProperty.h"
 #include "DurabilityProperty.generated.h"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@
  * @brief Represents the durability property of an item.
  */
 UCLASS(BlueprintType, EditInlineNew)
-class LYOKOBASE_API UDurabilityProperty : public UItemProperty
+class LYOKOBASE_API UDurabilityProperty : public ULyokoProperty
 {
     GENERATED_BODY()
     
@@ -26,8 +26,8 @@ public:
     /**
      * @brief The current durability value of the item.
      */
-    UPROPERTY(EditAnywhere, Category = "Item Property")
-    float MaximumDurability = 100.0f;
+    UPROPERTY(EditAnywhere, Category = "Durability Property")
+    int MaximumDurability = 100;
 
     /**
      * @brief Checks if the durability property data is valid.

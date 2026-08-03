@@ -11,15 +11,15 @@
 //----------------------------------------------------------------------------------------------------------------------
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "ItemProperty.generated.h"
+#include "LyokoProperty.generated.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 /**
- * @brief Base class for item properties in the game.
+ * @brief Base class for schema properties in the game.
  */
 UCLASS(Abstract, BlueprintType, Blueprintable, EditInlineNew, DefaultToInstanced)
-class LYOKOBASE_API UItemProperty : public UObject
+class LYOKOBASE_API ULyokoProperty : public UObject
 {
     GENERATED_BODY()
-
+    
 };

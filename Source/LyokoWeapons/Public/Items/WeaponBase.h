@@ -10,6 +10,7 @@
 
 #include "CoreMinimal.h"
 #include "Gameplay/Items/Item.h"
+#include "Gameplay/Interactable.h"
 #include "Items/WeaponBaseData.h"
 #include "WeaponBase.generated.h"
 
@@ -26,17 +27,11 @@ public:
     UPROPERTY(BlueprintReadWrite)
     float LastAttackTime = 0.0f;
 
-protected:
-    inline virtual TSubclassOf<UItemData> GetMinimumItemDataClass_Implementation() const override
-    {
-        return UWeaponBaseData::StaticClass();
-    }
-
 public:
     UFUNCTION(BlueprintCallable, Category = "Gameplay|Weapon")
     inline UWeaponBaseData *GetWeaponData() const
     {
-        return static_cast<UWeaponBaseData *>(GetItemData());
+        return Cast<UWeaponBaseData>(GetItemDefinition()); //TODO@g: Fix
     }
 
 public:

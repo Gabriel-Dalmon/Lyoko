@@ -2,8 +2,7 @@
 
 #include "Items/WeaponBase.h"
 #include "Gameplay/Combat/CombatActor.h"
-#include "Items/WeaponRules.h"
-
+#include "Gameplay/InteractionTypes.h"
 
 void AWeaponBase::Interact_Implementation(EInteractionTypes Type)
 {

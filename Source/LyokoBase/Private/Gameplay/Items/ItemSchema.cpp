@@ -1,5 +1,4 @@
 // Copyright © 2025-2027 Lyoko - 96 l'Art Cheperdu
 
 
-#include "Gameplay/Items/ItemProperty.h"
-
+#include "Gameplay/Items/ItemSchema.h"

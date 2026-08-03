@@ -1,7 +1,7 @@
 // Copyright © 2025-2027 Lyoko - 96 l'Art Cheperdu
 
 
-#include "Gameplay/Items/ItemDefinition.h"
+#include "Model/LyokoSchema.h"
 
 #if WITH_EDITOR
 //----------------------------------------------------------------------------------------------------------------------
@@ -11,35 +11,68 @@
 #endif
 
 //----------------------------------------------------------------------------------------------------------------------
-bool UItemDefinition::HasProperty(TSubclassOf<UItemProperty> PropertyClass) const
+bool ULyokoSchema::HasProperty(TSubclassOf<ULyokoProperty> PropertyClass) const
 {
     return Properties.Contains(PropertyClass);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-UItemProperty *UItemDefinition::GetProperty(TSubclassOf<UItemProperty> PropertyClass) const
+bool ULyokoSchema::HasProperties(const TSet<TSubclassOf<ULyokoProperty>> &PropertyClasses) const
 {
+    if (PropertyClasses.Num() > Properties.Num()) [[unlikely]]
+    {
+        return false;
+    }
+
+    for (const TSubclassOf<ULyokoProperty> &PropertyClass : PropertyClasses)
+    {
+        if (!HasProperty(PropertyClass))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+bool ULyokoSchema::HasAnyProperty(const TSet<TSubclassOf<ULyokoProperty>> &PropertyClasses) const
+{
+    for (const TSubclassOf<ULyokoProperty> &PropertyClass : PropertyClasses)
+    {
+        if (HasProperty(PropertyClass))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+ULyokoProperty *ULyokoSchema::GetProperty(TSubclassOf<ULyokoProperty> PropertyClass) const
+{
+    ensureMsgf(PropertyClass, TEXT("PropertyClass is null. Please provide a valid property class."));
+    ensureMsgf(Properties.Contains(PropertyClass), TEXT("PropertyClass %s is not found in Properties map."), *PropertyClass->GetName());
     return Properties.FindRef(PropertyClass);
 }
 
 #if WITH_EDITOR
 #pragma region Editor
 //----------------------------------------------------------------------------------------------------------------------
-void UItemDefinition::PreEditChange(FProperty *PropertyAboutToChange)
+void ULyokoSchema::PreEditChange(FProperty *PropertyAboutToChange)
 {
     Super::PreEditChange(PropertyAboutToChange);
-    if (PropertyAboutToChange && PropertyAboutToChange->GetFName() == GET_MEMBER_NAME_CHECKED(UItemDefinition, Properties))
+    if (PropertyAboutToChange && PropertyAboutToChange->GetFName() == GET_MEMBER_NAME_CHECKED(ULyokoSchema, Properties))
     {
         PreviousProperties = Properties;
     }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void UItemDefinition::PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent)
+void ULyokoSchema::PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
 
-    if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UItemDefinition, Properties))
+    if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(ULyokoSchema, Properties))
     {
         // Properties Map Size Changed
         if (PreviousProperties.Num() < Properties.Num())
@@ -99,13 +132,13 @@ void UItemDefinition::PostEditChangeProperty(FPropertyChangedEvent &PropertyChan
                     OnPropertyValueEmptied(Key, Value);
                 }
             }
-            
+
         }
     }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-EDataValidationResult UItemDefinition::IsDataValid(FDataValidationContext &Context) const
+EDataValidationResult ULyokoSchema::IsDataValid(FDataValidationContext &Context) const
 {
     EDataValidationResult Result = EDataValidationResult::Valid;
 
@@ -130,19 +163,19 @@ EDataValidationResult UItemDefinition::IsDataValid(FDataValidationContext &Conte
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void UItemDefinition::OnPropertyKeyChanged(TSubclassOf<UItemProperty> &Key, TObjectPtr<UItemProperty> &Value)
+void ULyokoSchema::OnPropertyKeyChanged(TSubclassOf<ULyokoProperty> &Key, TObjectPtr<ULyokoProperty> &Value)
 {
-    Value = NewObject<UItemProperty>(this, Key);
+    Value = NewObject<ULyokoProperty>(this, Key);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void UItemDefinition::OnPropertyValueChanged(TSubclassOf<UItemProperty> &Key, TObjectPtr<UItemProperty> &Value)
+void ULyokoSchema::OnPropertyValueChanged(TSubclassOf<ULyokoProperty> &Key, TObjectPtr<ULyokoProperty> &Value)
 {
     auto NewPropertyClass = Value->GetClass();
     if (PreviousProperties.Contains(NewPropertyClass))
     {
         Value = PreviousProperties[Key];
-        PushErrorNotification(NewPropertyClass->GetName() + " is already attached to this item. Please choose a different property.");
+        PushErrorNotification(NewPropertyClass->GetName() + " is already attached to this data asset. Please choose a different property.");
     }
     else
     {
@@ -151,18 +184,18 @@ void UItemDefinition::OnPropertyValueChanged(TSubclassOf<UItemProperty> &Key, TO
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void UItemDefinition::OnPropertyKeyEmptied(TSubclassOf<UItemProperty> &Key, TObjectPtr<UItemProperty> &Value)
+void ULyokoSchema::OnPropertyKeyEmptied(TSubclassOf<ULyokoProperty> &Key, TObjectPtr<ULyokoProperty> &Value)
 {
     Value = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void UItemDefinition::OnPropertyValueEmptied(TSubclassOf<UItemProperty> &Key, TObjectPtr<UItemProperty> &Value)
+void ULyokoSchema::OnPropertyValueEmptied(TSubclassOf<ULyokoProperty> &Key, TObjectPtr<ULyokoProperty> &Value)
 {
     if (PreviousProperties.Contains(nullptr))
     {
         Value = PreviousProperties[Key];
-        PushErrorNotification("There is already an empty property assigned to this item.");
+        PushErrorNotification("There is already an empty property assigned to this data asset.");
     }
     else
     {
@@ -171,17 +204,17 @@ void UItemDefinition::OnPropertyValueEmptied(TSubclassOf<UItemProperty> &Key, TO
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void UItemDefinition::OnPropertyAdded(TSubclassOf<UItemProperty> &Key, TObjectPtr<UItemProperty> &Value)
+void ULyokoSchema::OnPropertyAdded(TSubclassOf<ULyokoProperty> &Key, TObjectPtr<ULyokoProperty> &Value)
 {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void UItemDefinition::OnPropertyRemoved(TSubclassOf<UItemProperty> &Key, TObjectPtr<UItemProperty> &Value)
+void ULyokoSchema::OnPropertyRemoved(TSubclassOf<ULyokoProperty> &Key, TObjectPtr<ULyokoProperty> &Value)
 {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void UItemDefinition::PushErrorNotification(FString Message)
+void ULyokoSchema::PushErrorNotification(FString Message)
 {
     FNotificationInfo Info(
         FText::FromString(Message)

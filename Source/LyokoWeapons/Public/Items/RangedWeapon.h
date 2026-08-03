@@ -12,6 +12,8 @@
 #include "Items/WeaponBase.h"
 #include "Projectiles/ProjectileBase.h"
 #include "Items/RangedWeaponData.h"
+#include "Items/Properties/ReloadProperty.h"
+#include "Items/Properties/ProjectileProperty.h"
 #include "RangedWeapon.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloaded, int, BatchSize);
@@ -35,6 +37,13 @@ protected:
     UPROPERTY(BlueprintReadWrite)
     int CurrentAmmunitionCount = 0;
 
+public:
+    inline virtual TSet<TSubclassOf<ULyokoProperty>> GetMandatoryProperties_Implementation() const override {
+        auto Properties = Super::GetMandatoryProperties_Implementation();
+        Properties.Append({ UReloadProperty::StaticClass(), UProjectileProperty::StaticClass() });
+        return Properties;
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     // WeaponBase Overrides
     //------------------------------------------------------------------------------------------------------------------
@@ -46,12 +55,6 @@ public:
 
 protected:
     virtual float ComputeDamageMultiplier_Implementation() const override;
-
-protected:
-    inline virtual TSubclassOf<UItemData> GetMinimumItemDataClass_Implementation() const override
-    {
-        return URangedWeaponData::StaticClass();
-    }
 
 public:
     UPROPERTY(BlueprintAssignable, Category = "Gameplay|Weapon|Ranged")

@@ -3,15 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataAsset.h"
-#include "ItemData.generated.h"
+#include "Model/LyokoProperty.h"
+#include "ReloadProperty.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class LYOKOBASE_API UItemData : public UPrimaryDataAsset
+class LYOKOWEAPONS_API UReloadProperty : public ULyokoProperty
 {
     GENERATED_BODY()
-
+    
 };

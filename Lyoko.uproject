@@ -1,69 +1,71 @@
 {
-    "FileVersion": 3,
-    "EngineAssociation": "5.8",
-    "Category": "",
-    "Description": "",
-    "Modules": [
-        {
-            "Name": "Lyoko",
-            "Type": "Runtime",
-            "LoadingPhase": "Default"
-        },
-        {
-            "Name": "LyokoAI",
-            "Type": "Runtime",
-            "LoadingPhase": "Default"
-        },
-        {
-            "Name": "LyokoBase",
-            "Type": "Runtime",
-            "LoadingPhase": "Default"
-        },
-        {
-            "Name": "LyokoDungeon",
-            "Type": "Runtime",
-            "LoadingPhase": "Default"
-        },
-        {
-            "Name": "LyokoEditor",
-            "Type": "Editor",
-            "LoadingPhase": "Default"
-        },
-        {
-            "Name": "LyokoEnemies",
-            "Type": "Runtime",
-            "LoadingPhase": "Default"
-        },
-        {
-            "Name": "LyokoPlayer",
-            "Type": "Runtime",
-            "LoadingPhase": "Default"
-        },
-        {
-            "Name": "LyokoWeapons",
-            "Type": "Runtime",
-            "LoadingPhase": "Default"
-        }
-    ],
-    "Plugins": [
-        {
-            "Name": "ModelingToolsEditorMode",
-            "Enabled": true
-        },
-        {
-            "Name": "CommonUI",
-            "Enabled": true
-        },
-        {
-            "Name": "VisualStudioTools",
-            "Enabled": true,
-            "SupportedTargetPlatforms": [
-                "Win64"
-            ]
-        }
-    ],
-    "TargetPlatforms": [],
-    "AdditionalRootDirectories": [],
-    "AdditionalPluginDirectories": [],
-    "EpicSampleNameHash": ""
+	"FileVersion": 3,
+	"EngineAssociation": "5.8",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "Lyoko",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "LyokoAI",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "LyokoBase",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"CoreUObject"
+			]
+		},
+		{
+			"Name": "LyokoDungeon",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "LyokoEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "LyokoEnemies",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "LyokoPlayer",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "LyokoWeapons",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"LyokoBase"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
+			"Name": "VisualStudioTools",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"Win64"
+			]
+		}
+	]
 }

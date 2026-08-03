@@ -1,16 +1,20 @@
-// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
+// Copyright © 2025-2027 Lyoko - 96 l'Art Cheperdu
+//     __                __       
+//    / /   __  ______  / /______ 
+//   / /   / / / / __ \/ //_/ __ \
+//  / /___/ /_/ / /_/ / ,< / /_/ /
+// /_____/\__, /\____/_/|_|\____/ 
+//       /____/                   
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Gameplay/Items/ItemBase.h"
-#include "Gameplay/Interactable.h"
 #include "Gameplay/Pickupable.h"
 #include "Gameplay/Droppable.h"
-#include "Gameplay/InteractionTypes.h"
 #include "GameplayTagContainer.h"
-#include "Gameplay/Items/ItemRules.h"
-#include "Gameplay/Items/ItemData.h"
+#include "Gameplay/Items/ItemSchema.h"
+#include "Gameplay/Items/DurabilityProperty.h"
 #include "Item.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDurabilityChanged, int, DurabilityDifference, int, NewDurability);
@@ -39,31 +43,37 @@ public:
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<UItemData> ItemDataAsset;
-
-public:
-    UFUNCTION(BlueprintCallable, Category = "Gameplay|Item")
-    inline UItemData *GetItemData() const
-    {
-        ensure(ItemDataAsset);
-        return ItemDataAsset;
-    }
+    TObjectPtr<UItemSchema> ItemDefinition;
 
 public:
 #if WITH_EDITOR
     virtual void PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent) override;
 #endif
 
-protected:
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Gameplay|Item")
-    TSubclassOf<UItemData> GetMinimumItemDataClass() const;
-    inline virtual TSubclassOf<UItemData> GetMinimumItemDataClass_Implementation() const
+public:
+    UFUNCTION(BlueprintCallable, Category = "Gameplay|Item")
+    inline UItemSchema *GetItemDefinition() const { return ItemDefinition; }
+
+    UFUNCTION(BlueprintCallable, Category = "Gameplay|Item")
+    inline ULyokoProperty *GetProperty(TSubclassOf<ULyokoProperty> PropertyClass) const { return ItemDefinition->GetProperty(PropertyClass); }
+
+    template<typename PropertyType>
+    inline PropertyType *GetProperty() const
     {
-        return TSubclassOf<UItemData>();
+        return static_cast<PropertyType *>(ItemDefinition->GetProperty<PropertyType>());
     }
 
 private:
-    bool IsItemDataAssetValid() const;
+    bool IsItemDefinitionValid() const;
+
+public:
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Gameplay|Item")
+    TSet<TSubclassOf<ULyokoProperty>> GetMandatoryProperties() const;
+    inline virtual TSet<TSubclassOf<ULyokoProperty>> GetMandatoryProperties_Implementation() const { return { UDurabilityProperty::StaticClass() }; }
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Gameplay|Item")
+    TSet<TSubclassOf<ULyokoProperty>> GetOptionalProperties() const;
+    inline virtual TSet<TSubclassOf<ULyokoProperty>> GetOptionalProperties_Implementation() const { return {}; }
 
 protected:
     UPROPERTY(EditAnywhere, Category = "Sockets")
