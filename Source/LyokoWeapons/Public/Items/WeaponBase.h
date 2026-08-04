@@ -8,13 +8,14 @@
 
 #pragma once
 
+//----------------------------------------------------------------------------------------------------------------------
 #include "CoreMinimal.h"
 #include "Gameplay/Items/Item.h"
 #include "Gameplay/Interactable.h"
-#include "Items/WeaponBaseData.h"
+#include "Items/Properties/AttackCooldownProperty.h"
 #include "WeaponBase.generated.h"
 
-
+//----------------------------------------------------------------------------------------------------------------------
 /**
  * 
  */
@@ -28,10 +29,10 @@ public:
     float LastAttackTime = 0.0f;
 
 public:
-    UFUNCTION(BlueprintCallable, Category = "Gameplay|Weapon")
-    inline UWeaponBaseData *GetWeaponData() const
-    {
-        return Cast<UWeaponBaseData>(GetItemDefinition()); //TODO@g: Fix
+    inline virtual TSet<TSubclassOf<ULyokoProperty>> GetMandatoryProperties_Implementation() const override {
+        auto Properties = Super::GetMandatoryProperties_Implementation();
+        Properties.Append({ UAttackCooldownProperty::StaticClass() });
+        return Properties;
     }
 
 public:

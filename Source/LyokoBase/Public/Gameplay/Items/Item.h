@@ -60,7 +60,7 @@ public:
     template<typename PropertyType>
     inline PropertyType *GetProperty() const
     {
-        return static_cast<PropertyType *>(ItemDefinition->GetProperty<PropertyType>());
+        return ItemDefinition->GetProperty<PropertyType>();
     }
 
 private:

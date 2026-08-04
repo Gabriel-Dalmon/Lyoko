@@ -8,17 +8,20 @@
 
 #pragma once
 
+//----------------------------------------------------------------------------------------------------------------------
 #include "CoreMinimal.h"
 #include "Items/WeaponBase.h"
 #include "Projectiles/ProjectileBase.h"
-#include "Items/RangedWeaponData.h"
 #include "Items/Properties/ReloadProperty.h"
 #include "Items/Properties/ProjectileProperty.h"
+#include "Items/Properties/DamageModifierProperty.h"
 #include "RangedWeapon.generated.h"
 
+//----------------------------------------------------------------------------------------------------------------------
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloaded, int, BatchSize);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAmmunitionEmpty);
 
+//----------------------------------------------------------------------------------------------------------------------
 /**
  * 
  */
@@ -27,12 +30,6 @@ class LYOKOWEAPONS_API ARangedWeapon : public AWeaponBase
 {
     GENERATED_BODY()
 
-public:
-    inline virtual URangedWeaponData *GetRangedWeaponData() const
-    {
-        return static_cast<URangedWeaponData*>(GetWeaponData());
-    }
-
 protected:
     UPROPERTY(BlueprintReadWrite)
     int CurrentAmmunitionCount = 0;
@@ -40,7 +37,7 @@ protected:
 public:
     inline virtual TSet<TSubclassOf<ULyokoProperty>> GetMandatoryProperties_Implementation() const override {
         auto Properties = Super::GetMandatoryProperties_Implementation();
-        Properties.Append({ UReloadProperty::StaticClass(), UProjectileProperty::StaticClass() });
+        Properties.Append({ UReloadProperty::StaticClass(), UProjectileProperty::StaticClass(), UDamageModifierProperty::StaticClass() });
         return Properties;
     }
 

@@ -11,18 +11,18 @@
 //----------------------------------------------------------------------------------------------------------------------
 #include "CoreMinimal.h"
 #include "Model/LyokoProperty.h"
-#include "ProjectileProperty.generated.h"
+#include "DamageModifierProperty.generated.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 /**
- * 
+ * Property for modifying damage dealt by a weapon.
  */
 UCLASS()
-class LYOKOWEAPONS_API UProjectileProperty : public ULyokoProperty
+class LYOKOWEAPONS_API UDamageModifierProperty : public ULyokoProperty
 {
     GENERATED_BODY()
 
 public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-    TSubclassOf<class AProjectileBase> ProjectileClass;
+    float DamageModifier = 1.0f;
 };

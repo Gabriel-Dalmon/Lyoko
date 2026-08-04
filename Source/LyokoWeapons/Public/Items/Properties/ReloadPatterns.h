@@ -10,19 +10,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 #include "CoreMinimal.h"
-#include "Model/LyokoProperty.h"
-#include "ProjectileProperty.generated.h"
+#include "ReloadPatterns.generated.h"
 
 //----------------------------------------------------------------------------------------------------------------------
-/**
- * 
- */
-UCLASS()
-class LYOKOWEAPONS_API UProjectileProperty : public ULyokoProperty
+UENUM(BlueprintType)
+enum class EReloadPattern : uint8
 {
-    GENERATED_BODY()
-
-public:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-    TSubclassOf<class AProjectileBase> ProjectileClass;
+    Complete,
+    Incremental
 };

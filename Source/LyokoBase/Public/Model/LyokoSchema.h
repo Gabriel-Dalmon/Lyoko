@@ -76,7 +76,7 @@ public:
     PropertyType *GetProperty() const
     {
         static_assert(TIsDerivedFrom<PropertyType, ULyokoProperty>::IsDerived, "PropertyType must be derived from ULyokoProperty");
-        return static_cast<PropertyType *>(Properties.Find(PropertyType::StaticClass()));
+        return static_cast<PropertyType *>(Properties.FindRef(PropertyType::StaticClass()));
     }
 
     //------------------------------------------------------------------------------------------------------------------

@@ -4,25 +4,25 @@
 //   / /   / / / / __ \/ //_/ __ \
 //  / /___/ /_/ / /_/ / ,< / /_/ /
 // /_____/\__, /\____/_/|_|\____/ 
-//       /____/                   
+//       /____/
 
 #pragma once
 
 //----------------------------------------------------------------------------------------------------------------------
 #include "CoreMinimal.h"
 #include "Model/LyokoProperty.h"
-#include "ProjectileProperty.generated.h"
+#include "AttackCooldownProperty.generated.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 /**
- * 
+ * Property for modifying the attack cooldown of a weapon.
  */
 UCLASS()
-class LYOKOWEAPONS_API UProjectileProperty : public ULyokoProperty
+class LYOKOWEAPONS_API UAttackCooldownProperty : public ULyokoProperty
 {
     GENERATED_BODY()
 
 public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-    TSubclassOf<class AProjectileBase> ProjectileClass;
+    float AttackCooldown = 1.0f;
 };

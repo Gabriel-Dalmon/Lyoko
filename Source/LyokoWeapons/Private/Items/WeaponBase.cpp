@@ -56,11 +56,10 @@ void AWeaponBase::AttackInDirection_Implementation(const FVector &Direction)
 
 bool AWeaponBase::IsAttackAvailable_Implementation() const
 {
-    auto WeaponData = GetWeaponData();
     auto CurrentTime = GetWorld()->GetTimeSeconds();
     auto LastAttackElapsedTime = CurrentTime - LastAttackTime;
 
-    return LastAttackElapsedTime < WeaponData->AttackCooldown;
+    return LastAttackElapsedTime < GetProperty<UAttackCooldownProperty>()->AttackCooldown;
 }
 
 FVector AWeaponBase::GetDefaultAttackDirection_Implementation() const

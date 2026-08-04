@@ -8,12 +8,15 @@
 
 #pragma once
 
+//----------------------------------------------------------------------------------------------------------------------
 #include "NativeGameplayTags.h"
 #include "Gameplay/Items/ItemRules.h"
 
+//----------------------------------------------------------------------------------------------------------------------
 LYOKOWEAPONS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Weapon_OutOfAmmo);
 LYOKOWEAPONS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Weapon_Reloading);
 
+//----------------------------------------------------------------------------------------------------------------------
 namespace WeaponRules {
     inline const FGameplayTagContainer IsFireDisabledTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
         TAG_Item_Broken,

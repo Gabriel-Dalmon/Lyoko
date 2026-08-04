@@ -2,17 +2,15 @@
 
 
 #include "Items/RangedWeapon.h"
-#include "Items/RangedWeaponData.h"
 #include "Items/WeaponRules.h"
 
+//----------------------------------------------------------------------------------------------------------------------
 void ARangedWeapon::OnSecondaryInteracted_Implementation()
 {
     Reload();
 }
 
-/**
-* @param Direction - Direction in which to attack
-*/
+//----------------------------------------------------------------------------------------------------------------------
 void ARangedWeapon::AttackInDirection_Implementation(const FVector &Direction)
 {
     FireInDirection(Direction);
@@ -66,8 +64,7 @@ void ARangedWeapon::Fire(const FVector &OffsetFromMuzzle, const FVector &Directi
 */
 void ARangedWeapon::Fire(const FVector &OffsetFromMuzzle, const FVector & Direction, const float InitialSpeed)
 {
-    auto WeaponData = GetRangedWeaponData();
-    TSubclassOf<AProjectileBase> ProjectileClass = WeaponData->ProjectileClass;
+    const auto ProjectileClass = GetProperty<UProjectileProperty>()->ProjectileClass;
 
     const FTransform MuzzleTransform = GetMuzzleTransform();
     const FVector MuzzleLocation = MuzzleTransform.GetLocation();
@@ -116,6 +113,7 @@ void ARangedWeapon::FireInDirection_Implementation(const FVector& Direction)
     Fire(OffsetFromMuzzle, Direction);
 }
 
+//----------------------------------------------------------------------------------------------------------------------
 void ARangedWeapon::OnFired_Implementation(AProjectileBase *Projectile)
 {
 }
@@ -124,13 +122,9 @@ void ARangedWeapon::OnFired_Implementation(AProjectileBase *Projectile)
 float ARangedWeapon::ComputeDamageMultiplier_Implementation() const
 {
     float BaseMultiplier = Super::ComputeDamageMultiplier_Implementation();
-    auto WeaponData = GetRangedWeaponData();
-    if (!WeaponData) [[unlikely]] return BaseMultiplier;
 
-    return BaseMultiplier * WeaponData->DamageModifier;
+    return BaseMultiplier * GetProperty<UDamageModifierProperty>()->DamageModifier;
 }
-
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool ARangedWeapon::IsReloading() const
@@ -147,14 +141,14 @@ bool ARangedWeapon::IsReloadAvailable_Implementation() const
 //----------------------------------------------------------------------------------------------------------------------
 void ARangedWeapon::Reload()
 {
-    auto WeaponData = GetRangedWeaponData();
-    switch (WeaponData->ReloadPattern)
+    const auto ReloadProperty = GetProperty<UReloadProperty>();
+    switch (ReloadProperty->ReloadPattern)
     {
     case EReloadPattern::Complete:
         ReloadMax();
         break;
     case EReloadPattern::Incremental:
-        ReloadBatch(WeaponData->ReloadBatchSize);
+        ReloadBatch(ReloadProperty->ReloadBatchSize);
         break;
     default:
         break;
@@ -164,7 +158,7 @@ void ARangedWeapon::Reload()
 //----------------------------------------------------------------------------------------------------------------------
 void ARangedWeapon::ReloadMax()
 {
-    ReloadBatch(GetRangedWeaponData()->Capacity);
+    ReloadBatch(GetProperty<UReloadProperty>()->Capacity);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -173,9 +167,9 @@ void ARangedWeapon::ReloadBatch(int BatchSize)
     if (!IsReloadAvailable()) return;
     ensureMsgf(BatchSize > 0, TEXT("%s: Invalid batch size %d!"), *ARangedWeapon::StaticClass()->GetName(), BatchSize);
 
-    auto WeaponData = GetRangedWeaponData();
-    const float ReloadDuration = WeaponData->ReloadDuration;
-    const int SafeBatchSize = FMath::Clamp(BatchSize, 1, WeaponData->Capacity - CurrentAmmunitionCount);
+    const auto ReloadProperty = GetProperty<UReloadProperty>();
+    const float ReloadDuration = ReloadProperty->ReloadDuration;
+    const int SafeBatchSize = FMath::Clamp(BatchSize, 1, ReloadProperty->Capacity - CurrentAmmunitionCount);
 
     ItemTags.AddTag(TAG_Weapon_Reloading);
     OnReloadStarted();
@@ -233,8 +227,7 @@ FTransform ARangedWeapon::GetMuzzleTransform(ERelativeTransformSpace TransformSp
 */
 float ARangedWeapon::GetProjectileDefaultInitialSpeed() const
 {
-    auto WeaponData = GetRangedWeaponData();
-    TSubclassOf<AProjectileBase> ProjectileClass = WeaponData->ProjectileClass;
+    const auto ProjectileClass = GetProperty<UProjectileProperty>()->ProjectileClass;
 
     AProjectileBase *DefaultProjectileObject = ProjectileClass.GetDefaultObject();
     return DefaultProjectileObject->GetProjectileMovement()->InitialSpeed;
@@ -244,8 +237,7 @@ float ARangedWeapon::GetProjectileDefaultInitialSpeed() const
 */
 float ARangedWeapon::GetProjectileRadius() const
 {
-    auto WeaponData = GetRangedWeaponData();
-    TSubclassOf<AProjectileBase> ProjectileClass = WeaponData->ProjectileClass;
+    const auto ProjectileClass = GetProperty<UProjectileProperty>()->ProjectileClass;
 
     AProjectileBase *DefaultProjectileObject = ProjectileClass.GetDefaultObject();
     return DefaultProjectileObject->GetCollisionComp()->GetScaledSphereRadius();
