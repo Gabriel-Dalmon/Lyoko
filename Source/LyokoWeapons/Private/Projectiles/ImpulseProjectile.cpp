@@ -1,55 +1,49 @@
-// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
-
+// Copyright © 2025-2027 Lyoko - 96 l'Art Cheperdu
+//     __                __       
+//    / /   __  ______  / /______ 
+//   / /   / / / / __ \/ //_/ __ \
+//  /___/ /_/ / /_/ / ,< / /_/ /
+// /_____/ \__, / \____/_/|_| \____/ 
+//       /____/                    
 
 #include "Projectiles/ImpulseProjectile.h"
-#include "Projectiles/ImpulseProjectileData.h"
+#include "Projectiles/Properties/ProjectileImpulseProperty.h"
 #include "GeometryCollection/GeometryCollectionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-/**
-* Called when projectile hits something
-* @param HitComp — The component that hit
-* @param OtherActor — The actor that was hit
-* @param OtherComp — The component that was hit
-* @param NormalImpulse — The impulse applied
-* @param Hit — The hit result
-*/
+//----------------------------------------------------------------------------------------------------------------------
 void AImpulseProjectile::OnHit_Implementation(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
     Super::OnHit_Implementation(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 
-    const auto ImpulseStrength = GetImpulseProjectileData()->ImpulseStrength;
+    const float ImpulseStrength = GetImpulseStrength();
     if (ImpulseStrength > KINDA_SMALL_NUMBER) {
         ApplyImpulse(HitComp, OtherComp, Hit, OtherActor);
     }
 }
 
-/**
-* @param HitComp — The component that hit
-* @param OtherComp — The component that was hit
-* @param Hit — The hit result
-* @param OtherActor — The actor that was hit
-*/
+//----------------------------------------------------------------------------------------------------------------------
 void AImpulseProjectile::ApplyImpulse(UPrimitiveComponent* HitComp, UPrimitiveComponent* OtherComp, const FHitResult& Hit, AActor* OtherActor)
 {
     const FVector HitVelocity = HitComp->GetComponentVelocity();
-    const auto ImpulseData = GetImpulseProjectileData();
+    const float ImpulseStrength = GetImpulseStrength();
+    const TSubclassOf<AActor> MasterFieldClass = GetMasterFieldClass();
 
     /* Apply Impulse to surroundings */
     if (OtherComp->IsSimulatingPhysics())
     {
-        OtherComp->AddImpulseAtLocation(-Hit.ImpactNormal * ImpulseData->ImpulseStrength * HitVelocity.Size(), Hit.ImpactPoint);
+        OtherComp->AddImpulseAtLocation(-Hit.ImpactNormal * ImpulseStrength * HitVelocity.Size(), Hit.ImpactPoint);
     }
 
     /* Apply Impulse to Character Movement Component */
     UCharacterMovementComponent* OtherCharacterMovementComponent =
         OtherActor->FindComponentByClass<UCharacterMovementComponent>();
     if (OtherCharacterMovementComponent) {
-        OtherCharacterMovementComponent->AddImpulse(-Hit.ImpactNormal * ImpulseData->ImpulseStrength * HitVelocity.Size());
+        OtherCharacterMovementComponent->AddImpulse(-Hit.ImpactNormal * ImpulseStrength * HitVelocity.Size());
     }
 
     /* Spawn Master Field to destroy Geometry Collections */
-    if (OtherActor->FindComponentByClass<UGeometryCollectionComponent>() && ImpulseData->MasterFieldClass)
+    if (OtherActor->FindComponentByClass<UGeometryCollectionComponent>() && MasterFieldClass)
     {
         FActorSpawnParameters SpawnParams;
         SpawnParams.Owner = this;
@@ -57,11 +51,25 @@ void AImpulseProjectile::ApplyImpulse(UPrimitiveComponent* HitComp, UPrimitiveCo
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
         UWorld* World = GetWorld();
-        AActor* MasterField = World->SpawnActor<AActor>(ImpulseData->MasterFieldClass, Hit.ImpactPoint, FRotator::ZeroRotator, SpawnParams);
+        AActor* MasterField = World->SpawnActor<AActor>(MasterFieldClass, Hit.ImpactPoint, FRotator::ZeroRotator, SpawnParams);
         if (MasterField)
         {
             FTimerHandle TimerHandle;
             World->GetTimerManager().SetTimer(TimerHandle, [MasterField]() { MasterField->Destroy(); }, 0.1f, false);
         }
     }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+float AImpulseProjectile::GetImpulseStrength() const
+{
+    const auto ImpulseProp = GetImpulseProperty();
+    return ImpulseProp ? ImpulseProp->ImpulseStrength : 0.0f;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+TSubclassOf<AActor> AImpulseProjectile::GetMasterFieldClass() const
+{
+    const auto ImpulseProp = GetImpulseProperty();
+    return ImpulseProp ? ImpulseProp->MasterFieldClass : nullptr;
 }

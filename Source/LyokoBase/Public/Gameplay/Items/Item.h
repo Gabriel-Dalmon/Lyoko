@@ -15,6 +15,7 @@
 #include "GameplayTagContainer.h"
 #include "Gameplay/Items/ItemSchema.h"
 #include "Gameplay/Items/DurabilityProperty.h"
+#include  "Model/SchemaConsumer.h"
 #include "Item.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDurabilityChanged, int, DurabilityDifference, int, NewDurability);
@@ -23,7 +24,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDurabilityChanged, int, Durabili
  * 
  */
 UCLASS()
-class LYOKOBASE_API AItem : public AItemBase, public IPickupable, public IDroppable
+class LYOKOBASE_API AItem : public AItemBase, public IPickupable, public IDroppable, public ISchemaConsumer
 {
     GENERATED_BODY()
 
@@ -43,7 +44,7 @@ public:
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<UItemSchema> ItemDefinition;
+    TObjectPtr<UItemSchema> ItemSchema;
 
 public:
 #if WITH_EDITOR
@@ -52,28 +53,16 @@ public:
 
 public:
     UFUNCTION(BlueprintCallable, Category = "Gameplay|Item")
-    inline UItemSchema *GetItemDefinition() const { return ItemDefinition; }
+    inline UItemSchema *GetItemSchema() const { return ItemSchema; }
 
-    UFUNCTION(BlueprintCallable, Category = "Gameplay|Item")
-    inline ULyokoProperty *GetProperty(TSubclassOf<ULyokoProperty> PropertyClass) const { return ItemDefinition->GetProperty(PropertyClass); }
-
-    template<typename PropertyType>
-    inline PropertyType *GetProperty() const
-    {
-        return ItemDefinition->GetProperty<PropertyType>();
-    }
+public:
+    ULyokoSchema *GetSchema_Implementation() const override { return ItemSchema; }
 
 private:
     bool IsItemDefinitionValid() const;
 
 public:
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Gameplay|Item")
-    TSet<TSubclassOf<ULyokoProperty>> GetMandatoryProperties() const;
     inline virtual TSet<TSubclassOf<ULyokoProperty>> GetMandatoryProperties_Implementation() const { return { UDurabilityProperty::StaticClass() }; }
-
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Gameplay|Item")
-    TSet<TSubclassOf<ULyokoProperty>> GetOptionalProperties() const;
-    inline virtual TSet<TSubclassOf<ULyokoProperty>> GetOptionalProperties_Implementation() const { return {}; }
 
 protected:
     UPROPERTY(EditAnywhere, Category = "Sockets")

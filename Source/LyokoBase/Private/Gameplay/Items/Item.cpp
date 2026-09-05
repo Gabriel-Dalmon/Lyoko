@@ -12,7 +12,7 @@ void AItem::PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
 
-    if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(AItem, ItemDefinition))
+    if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(AItem, ItemSchema))
     {
         if (!IsItemDefinitionValid())
         {
@@ -27,13 +27,13 @@ void AItem::PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent)
 //----------------------------------------------------------------------------------------------------------------------
 bool AItem::IsItemDefinitionValid() const
 {
-    if (!ItemDefinition)
+    if (!ItemSchema)
     {
         UE_LOG(LogTemp, Error, TEXT("%s: ItemDefinition is not set!"), *AItem::StaticClass()->GetName());
         return false;
     }
     const auto MandatoryProperties = GetMandatoryProperties();
-    if (!ItemDefinition->HasProperties(MandatoryProperties))
+    if (!ItemSchema->HasProperties(MandatoryProperties))
     {
         UE_LOG(LogTemp, Error, TEXT("%s: ItemDefinition is missing mandatory properties!"), *AItem::StaticClass()->GetName());
         return false;

@@ -15,5 +15,8 @@ public class LyokoWeapons : ModuleRules
             "GameplayTags",
             "LyokoBase"
         });
+
+        // Include the new ProjectileProperties source files
+        PrivateIncludePaths.AddRange(new string[] { "LyokoWeapons/Private/Projectiles/Properties" });
     }
 }

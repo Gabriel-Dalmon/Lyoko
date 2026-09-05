@@ -1,32 +1,52 @@
-// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
+// Copyright © 2025-2027 Lyoko - 96 l'Art Cheperdu
+//     __                __       
+//    / /   __  ______  / /______ 
+//   / /   / / / / __ \/ //_/ __ \
+//  / /___/ /_/ / /_/ / ,< / /_/ /
+// /_____/ \__, / \____/_/|_| \____/ 
+//       /____/                    
 
 #include "Projectiles/ProjectileBase.h"
+#include "Projectiles/Properties/ProjectileDamageProperty.h"
+#include "Projectiles/Properties/ProjectileRadiusProperty.h"
+#include "Projectiles/Properties/ProjectileOnHitBehaviorProperty.h"
 #include "GeometryCollection/GeometryCollectionComponent.h"
 #include "Gameplay/Characters/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Gameplay/Combat/CombatActor.h"
 
-#if WITH_EDITOR
-void AProjectileBase::PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent)
+//----------------------------------------------------------------------------------------------------------------------
+bool AProjectileBase::IsProjectileSchemaValid() const
 {
-    Super::PostEditChangeProperty(PropertyChangedEvent);
-
-    if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(AProjectileBase, ProjectileDataAsset))
-    {
-        if (!IsProjectileDataAssetValid())
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Only %s or derived is allowed. Resetting."), *GetMinimumProjectileDataClass()->GetName());
-            ProjectileDataAsset = nullptr;
-        }
-    }
-}
-#endif
-
-bool AProjectileBase::IsProjectileDataAssetValid() const
-{
-    return ProjectileDataAsset && ProjectileDataAsset->IsA(GetMinimumProjectileDataClass());
+    if (!ProjectileSchema) return false;
+    return ProjectileSchema->HasProperties(GetMandatoryProperties());
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+float AProjectileBase::GetDamage() const
+{
+    if (!ProjectileSchema) return 0.0f;
+    const auto DamageProp = ProjectileSchema->GetProperty<UProjectileDamageProperty>();
+    return DamageProp ? DamageProp->Damage : 0.0f;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+float AProjectileBase::GetRadius() const
+{
+    if (!ProjectileSchema) return 0.0f;
+    const auto RadiusProp = ProjectileSchema->GetProperty<UProjectileRadiusProperty>();
+    return RadiusProp ? RadiusProp->Radius : 0.0f;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+EProjectileOnHitBehavior AProjectileBase::GetOnHitBehavior() const
+{
+    if (!ProjectileSchema) return EProjectileOnHitBehavior::Destroy;
+    const auto OnHitBehaviorProp = ProjectileSchema->GetProperty<UProjectileOnHitBehaviorProperty>();
+    return OnHitBehaviorProp ? OnHitBehaviorProp->OnHitBehavior : EProjectileOnHitBehavior::Destroy;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 /**
 * Constructor
 */
@@ -56,6 +76,7 @@ AProjectileBase::AProjectileBase()
     ProjectileMovement->bShouldBounce = true;
 }
 
+//----------------------------------------------------------------------------------------------------------------------
 void AProjectileBase::BeginPlay()
 {
     Super::BeginPlay();
@@ -64,6 +85,7 @@ void AProjectileBase::BeginPlay()
     CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AProjectileBase::OnBeginOverlap);
 }
 
+//----------------------------------------------------------------------------------------------------------------------
 /**
 * Called when projectile hits something
 * @param HitComp — The component that hit
@@ -89,7 +111,8 @@ void AProjectileBase::OnHit_Implementation(UPrimitiveComponent* HitComp, AActor*
     OnValidTargetHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
     ApplyDamages(OtherActor);
 
-    switch (ProjectileDataAsset->OnHitBehavior)
+    const EProjectileOnHitBehavior OnHitBehavior = GetOnHitBehavior();
+    switch (OnHitBehavior)
     {
     case EProjectileOnHitBehavior::Destroy:
     case EProjectileOnHitBehavior::LetTargetDecide:
@@ -100,11 +123,13 @@ void AProjectileBase::OnHit_Implementation(UPrimitiveComponent* HitComp, AActor*
     }
 }
 
+//----------------------------------------------------------------------------------------------------------------------
 void AProjectileBase::OnBeginOverlap_Implementation(UPrimitiveComponent *OverlappedComponent, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
     OnHit(OverlappedComponent, OtherActor, OtherComp, FVector::ZeroVector, SweepResult);
 }
 
+//----------------------------------------------------------------------------------------------------------------------
 void AProjectileBase::ApplyDamages(AActor* OtherActor)
 {
     if (!OtherActor || OtherActor == this)
@@ -115,6 +140,7 @@ void AProjectileBase::ApplyDamages(AActor* OtherActor)
 
     if (HealthComp)
     {
-        HealthComp->TakeDamage(ProjectileDataAsset->Damage * BakedDamageMultiplier);
+        const float Damage = GetDamage();
+        HealthComp->TakeDamage(Damage * BakedDamageMultiplier);
     }
 }

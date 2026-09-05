@@ -1,5 +1,0 @@
-// Copyright © 2025 Lyoko - 96 l'Art Cheperdu
-
-
-#include "Projectiles/ProjectileDataBase.h"
-
